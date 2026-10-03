@@ -8,7 +8,7 @@ export default function Footer() {
     <footer className="border-t border-line">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-8 text-sm text-subtle sm:flex-row sm:px-6">
         <p>
-          © {year} {profile.name}. Built with React, Tailwind CSS & AOS.
+          © {year} {profile.name}. All rights reserved.
         </p>
         <div className="flex items-center gap-6">
           <a href={profile.github} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 transition hover:text-accent">

@@ -4,6 +4,8 @@ A personal portfolio landing page for **Georgio Saliba**, Full-Stack Developer (
 
 Built as a front-end only single page with React, Tailwind CSS and AOS scroll animations.
 
+**🔗 Live demo: [georgio-saliba-portfolio.vercel.app](https://georgio-saliba-portfolio.vercel.app/)**
+
 ![Portfolio preview — dark mode](docs/preview-dark.png)
 
 <details>

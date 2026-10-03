@@ -10,7 +10,7 @@ export default function Experience() {
       <ol className="relative space-y-10 border-l border-line pl-6 sm:pl-10">
         {experience.map((job, i) => (
           <li key={job.company} data-aos="fade-up" data-aos-delay={i * 100} className="relative">
-            <span className="absolute -left-[33px] top-6 flex size-4 items-center justify-center sm:-left-[49px]">
+            <span className="absolute -left-8.25 top-6 flex size-4 items-center justify-center sm:-left-12.25">
               <span className="relative size-3 rounded-full border-2 border-ink bg-accent" />
             </span>
 
