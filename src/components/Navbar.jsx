@@ -1,26 +1,65 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Icon from './Icons'
 import ThemeToggle from './ThemeToggle'
+import { profile } from '../data/resume'
 
 const links = [
-  { id: 'about', label: 'About' },
+  { id: 'work', label: 'Work' },
   { id: 'experience', label: 'Experience' },
-  { id: 'projects', label: 'Projects' },
-  { id: 'skills', label: 'Skills' },
-  { id: 'education', label: 'Education' },
+  { id: 'about', label: 'About' },
+  { id: 'github', label: 'GitHub', href: profile.github },
   { id: 'contact', label: 'Contact' },
 ]
+const sections = ['home', 'work', 'experience', 'about', 'contact']
+
+function NavLink({ link, active, className, onClick, tabIndex }) {
+  const external = Boolean(link.href)
+  return (
+    <a
+      href={link.href ?? `#${link.id}`}
+      target={external ? '_blank' : undefined}
+      rel={external ? 'noreferrer' : undefined}
+      aria-current={active ? 'true' : undefined}
+      onClick={onClick}
+      tabIndex={tabIndex}
+      className={className}
+    >
+      {link.label}
+      {external && (
+        <span aria-hidden="true" className="ml-0.5 text-[0.8em] text-muted">
+          ↗
+        </span>
+      )}
+    </a>
+  )
+}
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState('')
+  const progressRef = useRef(null)
 
+  // Header background + the thin reading-progress line along its bottom edge
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20)
-    onScroll()
+    let frame = 0
+    const update = () => {
+      frame = 0
+      const max = document.documentElement.scrollHeight - window.innerHeight
+      setScrolled(window.scrollY > 20)
+      progressRef.current.style.transform = `scaleX(${max > 0 ? window.scrollY / max : 0})`
+    }
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update)
+    }
+    update()
     window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    window.addEventListener('resize', onScroll)
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+    }
   }, [])
 
   // Highlight the nav link of the section currently in view
@@ -33,7 +72,7 @@ export default function Navbar() {
       },
       { rootMargin: '-45% 0px -50% 0px' },
     )
-    links.forEach(({ id }) => {
+    sections.forEach((id) => {
       const el = document.getElementById(id)
       if (el) observer.observe(el)
     })
@@ -42,71 +81,71 @@ export default function Navbar() {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
-        scrolled || open ? 'border-b border-line bg-ink' : 'bg-transparent'
+      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
+        scrolled || open ? 'bg-ink/90 backdrop-blur-sm' : ''
       }`}
     >
-      <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <a href="#home" className="font-mono text-lg font-semibold text-fg">
-          <span className="text-accent">&lt;</span>GS<span className="text-accent"> /&gt;</span>
+      <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-8">
+        <a href="#home" className="font-display text-2xl text-fg">
+          Georgio<span className="text-accent-soft">.</span>
         </a>
 
-        <ul className="hidden items-center gap-1 md:flex">
-          {links.map(({ id, label }) => (
-            <li key={id}>
-              <a
-                href={`#${id}`}
-                className={`rounded-lg px-3 py-2 text-sm transition-colors ${
-                  active === id ? 'text-accent' : 'text-muted hover:text-fg'
-                }`}
-              >
-                {label}
-              </a>
-            </li>
-          ))}
-        </ul>
+        <div className="flex items-center gap-2 md:gap-8">
+          <ul className="hidden items-center gap-7 md:flex">
+            {links.map((link) => (
+              <li key={link.id}>
+                <NavLink
+                  link={link}
+                  active={!link.href && active === link.id}
+                  className={`relative text-sm transition-colors duration-200 after:absolute after:-bottom-2 after:left-1/2 after:size-1 after:-translate-x-1/2 after:rounded-full after:bg-accent after:transition-opacity after:duration-300 ${
+                    !link.href && active === link.id ? 'text-fg after:opacity-100' : 'text-muted after:opacity-0 hover:text-fg'
+                  }`}
+                />
+              </li>
+            ))}
+          </ul>
 
-        <div className="flex items-center gap-2">
           <ThemeToggle />
-          <a
-            href="#contact"
-            className="hidden rounded-lg border border-accent/50 px-4 py-2 text-sm font-medium text-accent transition hover:bg-accent/10 md:inline-block"
-          >
-            Hire me
-          </a>
 
           <button
             type="button"
             onClick={() => setOpen((o) => !o)}
-            className="rounded-lg p-2 text-body hover:bg-fg/5 md:hidden"
+            className="rounded-full p-2 text-fg transition-colors hover:bg-fg/5 md:hidden"
             aria-label={open ? 'Close menu' : 'Open menu'}
             aria-expanded={open}
           >
-            <Icon name={open ? 'close' : 'menu'} className="size-6" />
+            <Icon name={open ? 'close' : 'menu'} className="size-5" />
           </button>
         </div>
       </nav>
 
       <div
-        className={`grid overflow-hidden transition-all duration-300 md:hidden ${
+        className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out md:hidden ${
           open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
         }`}
       >
-        <ul className="min-h-0 space-y-1 px-4 pb-4">
-          {links.map(({ id, label }) => (
-            <li key={id}>
-              <a
-                href={`#${id}`}
+        <ul className="min-h-0 overflow-hidden px-5 sm:px-8">
+          {links.map((link) => (
+            <li key={link.id} className="border-t border-line first:border-t-0">
+              <NavLink
+                link={link}
+                active={!link.href && active === link.id}
                 onClick={() => setOpen(false)}
-                className={`block rounded-lg px-3 py-2.5 ${
-                  active === id ? 'bg-accent/10 text-accent' : 'text-body hover:bg-fg/5'
+                tabIndex={open ? undefined : -1}
+                className={`flex items-center py-3.5 font-display text-2xl ${
+                  !link.href && active === link.id ? 'text-accent' : 'text-fg'
                 }`}
-              >
-                {label}
-              </a>
+              />
             </li>
           ))}
         </ul>
+      </div>
+
+      <div
+        className={`h-px transition-colors duration-300 ${scrolled || open ? 'bg-line' : 'bg-transparent'}`}
+        aria-hidden="true"
+      >
+        <div ref={progressRef} className="h-px origin-left scale-x-0 bg-accent" />
       </div>
     </header>
   )

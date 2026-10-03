@@ -1,52 +1,78 @@
-import Icon from './Icons'
-import SectionHeading from './SectionHeading'
+import { useEffect, useState } from 'react'
+import Reveal from './Reveal'
+import Section from './Section'
 import { profile } from '../data/resume'
 
-const channels = [
-  { icon: 'mail', label: 'Email', value: profile.email, href: `mailto:${profile.email}` },
-  { icon: 'phone', label: 'Phone', value: profile.phone, href: profile.phoneHref },
-  { icon: 'github', label: 'GitHub', value: 'github.com/georgio30', href: profile.github, external: true },
-  { icon: 'linkedin', label: 'LinkedIn', value: 'Georgio Saliba', href: profile.linkedin, external: true },
+const elsewhere = [
+  { label: 'GitHub', value: 'github.com/georgio30', href: profile.github },
+  { label: 'LinkedIn', value: 'Georgio Saliba', href: profile.linkedin },
+  { label: 'Phone', value: profile.phone, href: profile.phoneHref },
 ]
+
+function CopyEmail() {
+  const [copied, setCopied] = useState(false)
+
+  useEffect(() => {
+    if (!copied) return
+    const timer = setTimeout(() => setCopied(false), 1800)
+    return () => clearTimeout(timer)
+  }, [copied])
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(profile.email)
+      setCopied(true)
+    } catch {
+      // Clipboard blocked: the mailto link right next to it still works
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={copy}
+      className="rounded-full border border-line px-3 py-1 text-xs text-muted transition-colors duration-200 hover:border-fg/30 hover:text-fg"
+    >
+      <span aria-live="polite">{copied ? 'Copied ✓' : 'Copy'}</span>
+    </button>
+  )
+}
 
 export default function Contact() {
   return (
-    <section id="contact" className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
-      <SectionHeading
-        eyebrow="06. Contact"
-        title="Let's work together"
-        subtitle="Have a role, a project or just want to say hi? Reach out through any of these."
-      />
+    <Section id="contact" label="Contact">
+      <Reveal>
+        <h2 className="max-w-3xl font-display text-5xl leading-[1.05] text-fg md:text-7xl">
+          Have a role or a project in mind? <em className="text-accent">Say hello.</em>
+        </h2>
 
-      <div data-aos="fade-up" className="card p-6 sm:p-10">
-        <div className="flex flex-col gap-1">
-          <p className="text-2xl font-bold text-fg sm:text-3xl">{profile.name}</p>
-          <p className="font-mono text-sm text-muted">{profile.role}</p>
+        <div className="mt-12 flex flex-wrap items-center gap-4">
+          <a href={`mailto:${profile.email}`} className="link text-xl font-medium text-fg md:text-2xl">
+            {profile.email}
+          </a>
+          <CopyEmail />
         </div>
+        <p className="mt-3 text-sm text-muted">Email is the quickest way to reach me.</p>
 
-        <ul className="mt-8 grid grid-cols-2 gap-3 sm:gap-4">
-          {channels.map((c, i) => (
-            <li key={c.label} data-aos="fade-up" data-aos-delay={100 + i * 100}>
-              {/* Phones: compact icon + label tile; sm and up: full row with the value */}
-              <a
-                href={c.href}
-                target={c.external ? '_blank' : undefined}
-                rel={c.external ? 'noreferrer' : undefined}
-                aria-label={`${c.label}: ${c.value}`}
-                className="group flex h-full flex-col items-center gap-3 rounded-xl border border-line bg-ink p-4 text-center transition hover:-translate-y-0.5 hover:border-accent/50 sm:flex-row sm:gap-4 sm:text-left"
-              >
-                <span className="rounded-xl bg-accent/10 p-3 text-accent transition group-hover:bg-accent group-hover:text-on-accent">
-                  <Icon name={c.icon} className="size-5" />
-                </span>
-                <span className="min-w-0">
-                  <span className="block text-sm font-medium text-fg sm:font-normal sm:text-subtle">{c.label}</span>
-                  <span className="hidden truncate text-fg sm:block">{c.value}</span>
-                </span>
-              </a>
-            </li>
-          ))}
+        <ul className="mt-16 grid max-w-3xl gap-6 border-t border-line pt-8 sm:grid-cols-3">
+          {elsewhere.map((c) => {
+            const external = c.href.startsWith('http')
+            return (
+              <li key={c.label}>
+                <p className="text-sm text-muted">{c.label}</p>
+                <a
+                  href={c.href}
+                  target={external ? '_blank' : undefined}
+                  rel={external ? 'noreferrer' : undefined}
+                  className="link mt-1 inline-block text-fg"
+                >
+                  {c.value}
+                </a>
+              </li>
+            )
+          })}
         </ul>
-      </div>
-    </section>
+      </Reveal>
+    </Section>
   )
 }

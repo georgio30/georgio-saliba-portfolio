@@ -1,56 +1,45 @@
-import Icon from './Icons'
-import SectionHeading from './SectionHeading'
+import Reveal from './Reveal'
+import Section from './Section'
 import { experience } from '../data/resume'
+
+const year = (period) => period.slice(-4)
+const monthName = (mm) => new Date(2000, Number(mm) - 1).toLocaleString('en', { month: 'short' })
+
+// "06/2026 – 09/2026" → "Jun – Sep"
+const span = (period) =>
+  period
+    .split(' – ')
+    .map((date) => monthName(date.slice(0, 2)))
+    .join(' – ')
 
 export default function Experience() {
   return (
-    <section id="experience" className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
-      <SectionHeading eyebrow="02. Experience" title="Where I've worked" />
-
-      <ol className="relative space-y-10 border-l border-line pl-6 sm:pl-10">
+    <Section id="experience" label="Experience" title="Two summers, two teams.">
+      <ol className="border-t border-line">
         {experience.map((job, i) => (
-          <li key={job.company} data-aos="fade-up" data-aos-delay={i * 100} className="relative">
-            <span className="absolute -left-8.25 top-6 flex size-4 items-center justify-center sm:-left-12.25">
-              <span className="relative size-3 rounded-full border-2 border-ink bg-accent" />
-            </span>
-
-            <article className="card p-6 sm:p-8">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <h3 className="text-xl font-semibold text-fg">{job.title}</h3>
-                  <p className="mt-1 flex items-center gap-2 text-accent">
-                    <Icon name="briefcase" className="size-4" />
-                    {job.company}
-                  </p>
-                </div>
-                <div className="text-right text-sm">
-                  <p className="font-mono text-body">{job.period}</p>
-                  <p className="mt-1 flex items-center justify-end gap-1 text-subtle">
-                    <Icon name="pin" className="size-3.5" /> {job.location}
-                  </p>
-                </div>
+          <Reveal as="li" key={job.company} delay={i * 80} className="border-b border-line">
+            <article className="grid gap-x-12 gap-y-5 py-10 md:grid-cols-[9rem_1fr] md:py-14">
+              <div className="flex items-baseline gap-4 md:block">
+                <p className="font-display text-5xl leading-none text-fg/20 tabular-nums md:text-6xl">
+                  {year(job.period)}
+                </p>
+                <p className="text-sm text-muted md:mt-3">{span(job.period)}</p>
               </div>
 
-              <ul className="mt-5 space-y-3">
-                {job.points.map((point) => (
-                  <li key={point} className="flex gap-3 text-muted">
-                    <span className="mt-2.5 size-1.5 shrink-0 rounded-full bg-accent" />
-                    <span>{point}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <div className="mt-6 flex flex-wrap gap-2">
-                {job.tags.map((tag) => (
-                  <span key={tag} className="rounded-full bg-accent/10 px-3 py-1 font-mono text-xs text-accent">
-                    {tag}
-                  </span>
-                ))}
+              <div>
+                <p className="text-sm text-muted">
+                  <span className="font-medium text-fg">{job.company}</span> · {job.title} · {job.location}
+                </p>
+                <h3 className="mt-4 max-w-2xl text-balance font-display text-3xl leading-[1.15] text-fg md:text-4xl">
+                  {job.headline}
+                </h3>
+                <p className="mt-4 max-w-2xl leading-relaxed text-muted">{job.story}</p>
+                <p className="mt-5 text-sm text-muted">{job.tags.join(' · ')}</p>
               </div>
             </article>
-          </li>
+          </Reveal>
         ))}
       </ol>
-    </section>
+    </Section>
   )
 }

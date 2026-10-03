@@ -1,28 +1,55 @@
 # Georgio Saliba — Portfolio
 
-A personal portfolio landing page for **Georgio Saliba**, Full-Stack Developer (React · TypeScript · Node.js · Express · MySQL).
+A one-page portfolio for **Georgio Saliba**, Full-Stack Developer (React · TypeScript · Node.js · Express · MySQL).
 
-Built as a front-end only single page with React, Tailwind CSS and AOS scroll animations.
+Scroll past the hero and the projects move through a quiet 3D space: the one in front recedes to the side as the next one comes forward. Click a project and it opens in a lightbox with its own gallery, links and source.
 
 **🔗 Live demo: [georgio-saliba-portfolio.vercel.app](https://georgio-saliba-portfolio.vercel.app/)**
 
-![Portfolio preview — dark mode](docs/preview-dark.png)
+![Portfolio preview — light mode](docs/preview-light.png)
 
 <details>
-<summary>Light mode</summary>
+<summary>Dark mode</summary>
 
-![Portfolio preview — light mode](docs/preview-light.png)
+![Portfolio preview — dark mode](docs/preview-dark.png)
 
 </details>
 
 ## Features
 
-- **Responsive layout:** designed for phone, tablet and desktop
-- **Light / dark mode:** follows the system setting by default, remembers the visitor's choice, no flash on load
-- **Scroll animations** with [AOS](https://michalsnik.github.io/aos/) (respects *prefers-reduced-motion*)
-- **Sticky navbar** that highlights the section in view, with a mobile menu
-- **Typewriter hero**, experience timeline, project cards, skills and languages
-- **Single source of content:** all CV data lives in [`src/data/resume.js`](src/data/resume.js)
+- **3D scroll gallery:** projects are placed with CSS 3D transforms driven by scroll position (no animation or 3D library). Phones get a flatter, shallower version; *prefers-reduced-motion* gets a plain list
+- **Project lightbox:** multiple screenshots with arrows, dots, swipe and keyboard; Escape to close; the page behind is locked, keeps its scroll position and gets focus back when you close it
+- **Per-project links:** "Live website" and "View source on GitHub" point to that project's own site and repository, and are only shown when they exist
+- **Light / dark mode:** light by default (dark if the system prefers it), remembers the visitor's choice, no flash on load
+- **Responsive images:** screenshots are served as WebP at 800 and 1600 px and lazy-loaded; a project can mark one screenshot as its phone version for the portrait card on small screens
+- **Sharing and search:** link preview image and tags, structured data about Georgio, a custom 404 page and a skip-to-content link
+
+## Adding a project
+
+1. Put the original screenshots (PNG or JPG) in `images-src/projects/`, e.g. `my-app-home.png`.
+2. Run `npm run images`. It writes `my-app-home-800.webp` and `my-app-home-1600.webp` to `public/images/projects/`.
+3. Add an entry to [`src/data/projects.js`](src/data/projects.js):
+
+```js
+{
+  slug: 'my-app',
+  title: 'My App',
+  year: '2026',
+  type: 'Web app',
+  summary: 'One line for the card.',
+  description: 'A few sentences for the lightbox.',
+  technologies: ['React', 'TypeScript'],
+  screenshots: [
+    { name: 'my-app-home', alt: 'Home page showing ...' },
+    { name: 'my-app-phone', alt: 'The app on a phone', phone: true }, // optional
+  ],
+  github: 'https://github.com/georgio30/my-app', // or null
+  live: 'https://my-app.example.com',          // or null
+  tone: '#ece8df',
+}
+```
+
+A project with no screenshots gets a generated cover (and a "how it's put together" panel if it has `layers`).
 
 ## Tech stack
 
@@ -30,7 +57,7 @@ Built as a front-end only single page with React, Tailwind CSS and AOS scroll an
 |---|---|
 | Framework | [React 19](https://react.dev) + [Vite](https://vite.dev) |
 | Styling | [Tailwind CSS v4](https://tailwindcss.com) |
-| Animations | [AOS](https://github.com/michalsnik/aos) |
+| Images | [sharp](https://sharp.pixelplumbing.com) (dev only, for `npm run images`) |
 | Linting | [oxlint](https://oxc.rs) |
 
 ## Getting started
@@ -52,27 +79,33 @@ Then open http://localhost:5173.
 | `npm run build` | Build for production into `dist/` |
 | `npm run preview` | Preview the production build locally |
 | `npm run lint` | Lint the code |
+| `npm run images` | Turn screenshots in `images-src/projects/` into responsive WebP |
 
 ## Project structure
 
 ```
 src/
-├── App.jsx              # Page layout + AOS setup
-├── index.css            # Tailwind theme tokens (light & dark)
-├── data/resume.js       # All portfolio content
+├── App.jsx                 # Page layout
+├── index.css               # Tailwind theme tokens (light & dark)
+├── data/
+│   ├── projects.js         # Every project shown in the gallery
+│   └── resume.js           # Profile, experience, skills
+├── lib/                    # Shared hooks and gallery helper
 └── components/
-    ├── Navbar.jsx       # Sticky nav, mobile menu, theme toggle
-    ├── ThemeToggle.jsx
+    ├── Navbar.jsx          # Sticky nav, active section, scroll progress
     ├── Hero.jsx
+    ├── Experience.jsx      # The internships, told briefly
+    ├── ProjectShowcase.jsx # The 3D scroll gallery
+    ├── ProjectCard.jsx     # One project in the gallery (hover depth)
+    ├── ProjectCover.jsx    # Generated cover for projects without screenshots
+    ├── ProjectModal.jsx    # Lightbox
+    ├── ProjectGallery.jsx  # Screenshots inside the lightbox (swipe, dots, arrows)
     ├── About.jsx
-    ├── Experience.jsx
-    ├── Projects.jsx
-    ├── Skills.jsx
-    ├── Education.jsx
     ├── Contact.jsx
     ├── Footer.jsx
-    ├── SectionHeading.jsx
-    └── Icons.jsx        # Inline SVG icon set
+    └── ...                 # Section, Reveal, Screenshot, ThemeToggle, Icons
+scripts/optimize-images.mjs
+images-src/projects/        # Original screenshots
 ```
 
 ## Contact

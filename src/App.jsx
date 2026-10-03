@@ -1,36 +1,37 @@
 import { useEffect } from 'react'
-import AOS from 'aos'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
-import About from './components/About'
+import ProjectShowcase from './components/ProjectShowcase'
 import Experience from './components/Experience'
-import Projects from './components/Projects'
-import Skills from './components/Skills'
-import Education from './components/Education'
+import About from './components/About'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
+import { profile } from './data/resume'
 
 export default function App() {
+  // A small hello for anyone who opens the dev tools
   useEffect(() => {
-    AOS.init({
-      duration: 800,
-      easing: 'ease-out-cubic',
-      once: true,
-      offset: 60,
-      disable: () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-    })
+    console.log(
+      `%cHey, you opened the console 👋\n%cThe source for this site is on GitHub: ${profile.github}`,
+      'font: 600 14px sans-serif',
+      'font: 13px sans-serif; color: #6f6f6a',
+    )
   }, [])
 
   return (
     <>
+      <a
+        href="#main"
+        className="fixed top-3 left-3 z-[60] -translate-y-20 rounded-full bg-fg px-4 py-2 text-sm font-medium text-ink transition-transform focus:translate-y-0"
+      >
+        Skip to content
+      </a>
       <Navbar />
-      <main>
+      <main id="main" tabIndex={-1} className="outline-none">
         <Hero />
-        <About />
+        <ProjectShowcase />
         <Experience />
-        <Projects />
-        <Skills />
-        <Education />
+        <About />
         <Contact />
       </main>
       <Footer />

@@ -7,15 +7,44 @@
     <meta name="description" content="Georgio Saliba — Full-Stack Developer building end-to-end web apps with React, TypeScript, Node.js, Express and MySQL." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
     <title>Georgio Saliba | Full-Stack Developer</title>
+    <link rel="canonical" href="https://georgio-saliba-portfolio.vercel.app/" />
+    <meta name="theme-color" content="#f7f6f2" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#171614" media="(prefers-color-scheme: dark)" />
+
+    <!-- Link previews (LinkedIn, WhatsApp, X, Slack…) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://georgio-saliba-portfolio.vercel.app/" />
+    <meta property="og:title" content="Georgio Saliba — Full-Stack Developer" />
+    <meta property="og:description" content="I build web apps from the database up: React and TypeScript interfaces on top of Node.js APIs and MySQL." />
+    <meta property="og:image" content="https://georgio-saliba-portfolio.vercel.app/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Georgio Saliba — I build web apps from the database up." />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Who this site is about, for search engines -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Georgio Saliba",
+        "jobTitle": "Full-Stack Developer",
+        "url": "https://georgio-saliba-portfolio.vercel.app/",
+        "address": { "@type": "PostalAddress", "addressLocality": "Byblos", "addressCountry": "LB" },
+        "alumniOf": "Arts, Sciences & Technology University in Lebanon (AUL)",
+        "knowsAbout": ["React", "TypeScript", "Node.js", "Express", "MySQL"],
+        "sameAs": ["https://github.com/georgio30", "https://lb.linkedin.com/in/georgio-saliba-30265a2b4"]
+      }
+    </script>
     <script>
       // Apply the saved (or system) theme before first paint to avoid a flash
       ;(function () {
         var theme
         try { theme = localStorage.getItem('theme') } catch (e) {}
         if (theme !== 'light' && theme !== 'dark') {
-          theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
+          theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
         }
         document.documentElement.classList.toggle('dark', theme === 'dark')
       })()

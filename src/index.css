@@ -2,62 +2,95 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Dark theme is the default; light values override below */
+/* Light theme is the default; dark values override below */
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
-  --color-ink: #111111;       /* page background */
-  --color-surface: #181818;   /* cards */
-  --color-fg: #f2f2f2;        /* primary text */
-  --color-muted: #a3a3a3;     /* secondary text */
-  --color-line: #2a2a2a;      /* borders */
-  --color-accent: #60a5fa;
-  --color-on-accent: #111111; /* text on accent fills */
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Instrument Serif", ui-serif, Georgia, serif;
+  --color-ink: #f7f6f2;          /* page background */
+  --color-surface: #ffffff;      /* the few cards there are */
+  --color-fg: #1b1a18;           /* primary text */
+  --color-muted: #6f6f6a;        /* secondary text */
+  --color-line: #e5e3dc;         /* borders */
+  --color-accent: #b84a33;       /* terracotta, dark enough for text */
+  --color-accent-soft: #e8846b;  /* decorative marks only */
+  --color-on-accent: #ffffff;    /* text on accent fills */
 
   /* Aliases kept so existing class names stay meaningful */
   --color-body: var(--color-fg);
   --color-subtle: var(--color-muted);
+
+  --ease-out-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
-:root:not(.dark) {
-  color-scheme: light;
-  --color-ink: #f7f7f5;
-  --color-surface: #ffffff;
-  --color-fg: #171717;
-  --color-muted: #666666;
-  --color-line: #e5e5e2;
-  --color-accent: #2563eb;
-  --color-on-accent: #ffffff;
+:root.dark {
+  color-scheme: dark;
+  --color-ink: #171614;
+  --color-surface: #1f1e1b;
+  --color-fg: #edebe6;
+  --color-muted: #9b988f;
+  --color-line: #2f2d29;
+  --color-accent: #ec8f75;
+  --color-accent-soft: #c96a51;
+  --color-on-accent: #171614;
 }
 
 html {
   scroll-padding-top: 5rem;
-}
-
-/* AOS slide-in animations start elements off to the side; without this they
-   widen the page on phones and the browser zooms out (header no longer fits) */
-html,
-body {
-  overflow-x: clip;
+  /* Keeps the layout still when the project modal hides the scrollbar */
+  scrollbar-gutter: stable;
 }
 
 body {
   @apply bg-ink text-fg font-sans antialiased transition-colors duration-300;
+  font-feature-settings: "ss01", "cv11";
 }
 
 ::selection {
-  @apply bg-accent/20 text-fg;
+  @apply bg-accent-soft/30 text-fg;
 }
 
-@utility card {
-  @apply rounded-2xl border border-line bg-surface transition-colors duration-300 hover:border-muted/40;
+:focus-visible {
+  @apply rounded-sm outline-2 outline-offset-4 outline-accent;
 }
 
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+/* Underlined text link whose underline warms up on hover */
+@utility link {
+  @apply underline decoration-line decoration-1 underline-offset-[0.25em] transition-colors duration-200 hover:text-accent hover:decoration-accent;
+}
+
+/* One gentle reveal per section, driven by useReveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 0.8s var(--ease-out-soft),
+    transform 0.8s var(--ease-out-soft);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  *,
+  ::before,
+  ::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }
