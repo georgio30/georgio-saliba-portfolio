@@ -37,18 +37,10 @@ export default function Hero() {
     <section id="home" className="relative flex min-h-screen items-center overflow-hidden pt-16">
       <div className="relative mx-auto grid w-full max-w-6xl items-center gap-12 px-4 py-20 sm:px-6 lg:grid-cols-[1.4fr_1fr]">
         <div>
-          <div
-            data-aos="fade-down"
-            className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-muted"
-          >
-            <span className="size-2 rounded-full bg-accent" />
-            Open to opportunities
-          </div>
-
           <h1
             data-aos="fade-up"
             data-aos-delay="100"
-            className="mt-6 text-4xl font-extrabold tracking-tight text-fg sm:text-6xl lg:text-7xl"
+            className="text-4xl font-extrabold tracking-tight text-fg sm:text-6xl lg:text-7xl"
           >
             Hi, I'm <span className="text-accent">{profile.name}</span>
           </h1>
