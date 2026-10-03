@@ -38,6 +38,13 @@ html {
   scroll-padding-top: 5rem;
 }
 
+/* AOS slide-in animations start elements off to the side; without this they
+   widen the page on phones and the browser zooms out (header no longer fits) */
+html,
+body {
+  overflow-x: clip;
+}
+
 body {
   @apply bg-ink text-fg font-sans antialiased transition-colors duration-300;
 }
