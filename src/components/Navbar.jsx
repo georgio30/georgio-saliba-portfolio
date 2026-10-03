@@ -43,7 +43,7 @@ export default function Navbar() {
   return (
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
-        scrolled || open ? 'border-b border-fg/10 bg-ink/80 backdrop-blur-lg' : 'bg-transparent'
+        scrolled || open ? 'border-b border-line bg-ink' : 'bg-transparent'
       }`}
     >
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">

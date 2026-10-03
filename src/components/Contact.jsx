@@ -21,7 +21,7 @@ export default function Contact() {
       <div data-aos="fade-up" className="card p-6 sm:p-10">
         <div className="flex flex-col gap-1">
           <p className="text-2xl font-bold text-fg sm:text-3xl">{profile.name}</p>
-          <p className="text-gradient font-mono text-sm font-medium">{profile.role}</p>
+          <p className="font-mono text-sm text-muted">{profile.role}</p>
         </div>
 
         <ul className="mt-8 grid grid-cols-2 gap-3 sm:gap-4">
@@ -33,9 +33,9 @@ export default function Contact() {
                 target={c.external ? '_blank' : undefined}
                 rel={c.external ? 'noreferrer' : undefined}
                 aria-label={`${c.label}: ${c.value}`}
-                className="group flex h-full flex-col items-center gap-3 rounded-xl border border-fg/10 bg-fg/[0.03] p-4 text-center transition hover:-translate-y-0.5 hover:border-accent/50 sm:flex-row sm:gap-4 sm:text-left"
+                className="group flex h-full flex-col items-center gap-3 rounded-xl border border-line bg-ink p-4 text-center transition hover:-translate-y-0.5 hover:border-accent/50 sm:flex-row sm:gap-4 sm:text-left"
               >
-                <span className="rounded-xl bg-accent/10 p-3 text-accent transition group-hover:bg-accent group-hover:text-ink">
+                <span className="rounded-xl bg-accent/10 p-3 text-accent transition group-hover:bg-accent group-hover:text-on-accent">
                   <Icon name={c.icon} className="size-5" />
                 </span>
                 <span className="min-w-0">

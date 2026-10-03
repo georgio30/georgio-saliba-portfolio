@@ -24,7 +24,7 @@ export default function About() {
         <div className="grid grid-cols-3 gap-4 self-start lg:grid-cols-1">
           {stats.map((s, i) => (
             <div key={s.label} data-aos="fade-left" data-aos-delay={i * 100} className="card p-5 text-center lg:text-left">
-              <p className="text-gradient text-3xl font-extrabold">{s.value}</p>
+              <p className="text-3xl font-extrabold text-fg">{s.value}</p>
               <p className="mt-1 text-sm text-muted">{s.label}</p>
             </div>
           ))}

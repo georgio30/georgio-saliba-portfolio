@@ -7,12 +7,11 @@ export default function Experience() {
     <section id="experience" className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
       <SectionHeading eyebrow="02. Experience" title="Where I've worked" />
 
-      <ol className="relative space-y-10 border-l border-fg/10 pl-6 sm:pl-10">
+      <ol className="relative space-y-10 border-l border-line pl-6 sm:pl-10">
         {experience.map((job, i) => (
           <li key={job.company} data-aos="fade-up" data-aos-delay={i * 100} className="relative">
             <span className="absolute -left-[33px] top-6 flex size-4 items-center justify-center sm:-left-[49px]">
-              {job.current && <span className="absolute size-4 animate-ping rounded-full bg-accent/50" />}
-              <span className="relative size-3 rounded-full border-2 border-ink bg-accent ring-4 ring-accent/20" />
+              <span className="relative size-3 rounded-full border-2 border-ink bg-accent" />
             </span>
 
             <article className="card p-6 sm:p-8">

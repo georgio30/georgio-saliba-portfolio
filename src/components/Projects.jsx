@@ -2,12 +2,6 @@ import Icon from './Icons'
 import SectionHeading from './SectionHeading'
 import { projects } from '../data/resume'
 
-const gradients = [
-  'from-sky-500/30 via-indigo-500/20 to-transparent',
-  'from-fuchsia-500/30 via-violet-500/20 to-transparent',
-  'from-emerald-500/30 via-teal-500/20 to-transparent',
-]
-
 export default function Projects() {
   return (
     <section id="projects" className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
@@ -23,15 +17,14 @@ export default function Projects() {
             key={project.name}
             data-aos="fade-up"
             data-aos-delay={i * 120}
-            className="card group flex flex-col overflow-hidden hover:-translate-y-1 hover:shadow-xl hover:shadow-accent/10"
-            style={{ transitionProperty: 'transform, box-shadow, border-color, background-color' }}
+            className="card group flex flex-col overflow-hidden hover:-translate-y-1"
+            style={{ transitionProperty: 'transform, border-color, background-color' }}
           >
-            <div className={`relative flex h-40 items-center justify-center bg-gradient-to-br ${gradients[i % gradients.length]}`}>
-              <div className="bg-grid absolute inset-0 opacity-60" />
-              <div className="relative rounded-2xl border border-fg/15 bg-ink/60 p-5 text-fg backdrop-blur transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+            <div className="relative flex h-40 items-center justify-center border-b border-line bg-line/60 dark:bg-ink">
+              <div className="relative rounded-2xl border border-line bg-surface p-5 text-accent transition-transform duration-300 group-hover:scale-105">
                 <Icon name={project.icon} className="size-10" />
               </div>
-              <span className="absolute right-4 top-4 rounded-full bg-ink/70 px-2.5 py-1 font-mono text-xs text-body">
+              <span className="absolute right-4 top-4 rounded-full border border-line bg-surface px-2.5 py-1 font-mono text-xs text-muted">
                 {project.year}
               </span>
             </div>
@@ -42,7 +35,7 @@ export default function Projects() {
               <p className="mt-3 flex-1 text-muted">{project.description}</p>
               <div className="mt-6 flex flex-wrap gap-2">
                 {project.stack.map((tech) => (
-                  <span key={tech} className="rounded-md border border-fg/10 px-2 py-1 font-mono text-xs text-body">
+                  <span key={tech} className="rounded-md border border-line px-2 py-1 font-mono text-xs text-body">
                     {tech}
                   </span>
                 ))}

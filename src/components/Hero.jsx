@@ -35,23 +35,13 @@ export default function Hero() {
 
   return (
     <section id="home" className="relative flex min-h-screen items-center overflow-hidden pt-16">
-      <div className="bg-grid absolute inset-0" />
-      <div className="animate-blob absolute -left-32 top-1/4 size-96 rounded-full bg-accent/20 blur-3xl" />
-      <div
-        className="animate-blob absolute -right-32 bottom-1/4 size-96 rounded-full bg-accent-2/20 blur-3xl"
-        style={{ animationDelay: '-6s' }}
-      />
-
       <div className="relative mx-auto grid w-full max-w-6xl items-center gap-12 px-4 py-20 sm:px-6 lg:grid-cols-[1.4fr_1fr]">
         <div>
           <div
             data-aos="fade-down"
-            className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300"
+            className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-muted"
           >
-            <span className="relative flex size-2">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex size-2 rounded-full bg-emerald-400" />
-            </span>
+            <span className="size-2 rounded-full bg-accent" />
             Open to opportunities
           </div>
 
@@ -60,7 +50,7 @@ export default function Hero() {
             data-aos-delay="100"
             className="mt-6 text-4xl font-extrabold tracking-tight text-fg sm:text-6xl lg:text-7xl"
           >
-            Hi, I'm <span className="text-gradient">{profile.name}</span>
+            Hi, I'm <span className="text-accent">{profile.name}</span>
           </h1>
 
           <p data-aos="fade-up" data-aos-delay="200" className="mt-4 h-9 font-mono text-xl text-body sm:text-2xl">
@@ -76,14 +66,14 @@ export default function Hero() {
           <div data-aos="fade-up" data-aos-delay="400" className="mt-10 flex flex-wrap gap-4">
             <a
               href="#projects"
-              className="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-accent to-accent-2 px-6 py-3 font-semibold text-ink shadow-lg shadow-accent/20 transition hover:shadow-accent/40"
+              className="group inline-flex items-center gap-2 rounded-xl bg-accent px-6 py-3 font-semibold text-on-accent transition hover:opacity-90"
             >
               View my work
               <Icon name="arrow" className="size-4 transition-transform group-hover:translate-x-1" />
             </a>
             <a
               href="#contact"
-              className="inline-flex items-center gap-2 rounded-xl border border-fg/15 px-6 py-3 font-semibold text-fg transition hover:border-fg/30 hover:bg-fg/5"
+              className="inline-flex items-center gap-2 rounded-xl border border-line bg-surface px-6 py-3 font-semibold text-fg transition hover:border-muted/40"
             >
               Get in touch
             </a>
@@ -102,7 +92,7 @@ export default function Hero() {
             <a href={profile.phoneHref} aria-label="Phone" className="transition hover:text-accent">
               <Icon name="phone" className="size-5" />
             </a>
-            <span className="h-px w-12 bg-fg/15" />
+            <span className="h-px w-12 bg-line" />
             <span className="flex items-center gap-1.5 text-sm">
               <Icon name="pin" className="size-4" /> {profile.location}
             </span>
@@ -111,24 +101,24 @@ export default function Hero() {
 
         {/* Code-editor style card */}
         <div data-aos="zoom-in" data-aos-delay="300" className="hidden lg:block">
-          <div className="overflow-hidden rounded-2xl border border-white/10 bg-slate-900 text-slate-300 shadow-2xl shadow-black/30">
-            <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
-              <span className="size-3 rounded-full bg-red-400/80" />
-              <span className="size-3 rounded-full bg-yellow-400/80" />
-              <span className="size-3 rounded-full bg-green-400/80" />
-              <span className="ml-3 font-mono text-xs text-slate-500">georgio.ts</span>
+          <div className="overflow-hidden rounded-2xl border border-line bg-surface text-fg">
+            <div className="flex items-center gap-2 border-b border-line px-4 py-3">
+              <span className="size-3 rounded-full bg-line" />
+              <span className="size-3 rounded-full bg-line" />
+              <span className="size-3 rounded-full bg-line" />
+              <span className="ml-3 font-mono text-xs text-muted">georgio.ts</span>
             </div>
             <pre className="overflow-x-auto p-5 font-mono text-[13px] leading-relaxed">
               <code>
-                <span className="text-indigo-400">const</span> <span className="text-white">developer</span> = {'{'}
-                {'\n'}  name: <span className="text-emerald-300">'Georgio Saliba'</span>,
-                {'\n'}  role: <span className="text-emerald-300">'Full-Stack Developer'</span>,
-                {'\n'}  frontend: [<span className="text-emerald-300">'React'</span>, <span className="text-emerald-300">'TypeScript'</span>],
-                {'\n'}  backend: [<span className="text-emerald-300">'Node.js'</span>, <span className="text-emerald-300">'Express'</span>],
-                {'\n'}  database: <span className="text-emerald-300">'MySQL'</span>,
-                {'\n'}  auth: [<span className="text-emerald-300">'JWT'</span>, <span className="text-emerald-300">'RBAC'</span>],
-                {'\n'}  cleanCode: <span className="text-sky-400">true</span>,
-                {'\n'}  coffee: <span className="text-amber-300">Infinity</span>,
+                <span className="text-accent">const</span> <span className="font-medium">developer</span> = {'{'}
+                {'\n'}  name: <span className="text-muted">'Georgio Saliba'</span>,
+                {'\n'}  role: <span className="text-muted">'Full-Stack Developer'</span>,
+                {'\n'}  frontend: [<span className="text-muted">'React'</span>, <span className="text-muted">'TypeScript'</span>],
+                {'\n'}  backend: [<span className="text-muted">'Node.js'</span>, <span className="text-muted">'Express'</span>],
+                {'\n'}  database: <span className="text-muted">'MySQL'</span>,
+                {'\n'}  auth: [<span className="text-muted">'JWT'</span>, <span className="text-muted">'RBAC'</span>],
+                {'\n'}  cleanCode: <span className="text-accent">true</span>,
+                {'\n'}  coffee: <span className="text-accent">Infinity</span>,
                 {'\n'}{'}'}
               </code>
             </pre>

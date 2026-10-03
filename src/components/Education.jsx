@@ -15,7 +15,7 @@ export default function Education() {
           <h3 className="mt-5 text-xl font-semibold text-fg">{education.degree}</h3>
           <p className="mt-2 text-muted">{education.school}</p>
           <div className="mt-6 flex flex-wrap gap-4 text-sm">
-            <span className="rounded-full bg-fg/5 px-3 py-1 font-mono text-body">{education.period}</span>
+            <span className="rounded-full border border-line bg-ink px-3 py-1 font-mono text-body">{education.period}</span>
             <span className="flex items-center gap-1 text-subtle">
               <Icon name="pin" className="size-4" /> {education.location}
             </span>
@@ -23,7 +23,7 @@ export default function Education() {
         </div>
 
         <div data-aos="fade-left" className="card p-6 sm:p-8">
-          <span className="inline-flex rounded-xl bg-accent-2/10 p-3 text-accent-2">
+          <span className="inline-flex rounded-xl bg-accent/10 p-3 text-accent">
             <Icon name="globe" className="size-7" />
           </span>
           <h3 className="mt-5 text-xl font-semibold text-fg">Languages</h3>
@@ -34,12 +34,12 @@ export default function Education() {
                   <span className="text-fg">{lang.name}</span>
                   <span className="text-muted">{lang.level}</span>
                 </div>
-                <div className="mt-2 h-2 overflow-hidden rounded-full bg-fg/5">
+                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-line">
                   <div
                     data-aos="slide-right"
                     data-aos-delay={200 + i * 150}
                     data-aos-duration="1000"
-                    className="h-full rounded-full bg-gradient-to-r from-accent to-accent-2"
+                    className="h-full rounded-full bg-accent"
                     style={{ width: `${lang.value}%` }}
                   />
                 </div>

@@ -23,7 +23,7 @@ export default function Skills() {
                 {group.items.map((item) => (
                   <span
                     key={item}
-                    className="rounded-lg border border-fg/10 bg-fg/[0.03] px-3 py-1.5 text-sm text-body transition hover:border-accent/50 hover:text-fg"
+                    className="rounded-lg border border-line bg-ink px-3 py-1.5 text-sm text-body transition hover:border-accent/50"
                   >
                     {item}
                   </span>
@@ -37,11 +37,11 @@ export default function Skills() {
       {/* Infinite tech marquee */}
       <div
         data-aos="fade"
-        className="relative mt-16 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)]"
+        className="relative mt-16 overflow-hidden"
       >
         <div className="flex w-max animate-[marquee_30s_linear_infinite] gap-4 motion-reduce:animate-none">
           {[...marquee, ...marquee].map((tech, i) => (
-            <span key={i} className="whitespace-nowrap rounded-full border border-fg/10 px-5 py-2 font-mono text-sm text-muted">
+            <span key={i} className="whitespace-nowrap rounded-full border border-line bg-surface px-5 py-2 font-mono text-sm text-muted">
               {tech}
             </span>
           ))}
