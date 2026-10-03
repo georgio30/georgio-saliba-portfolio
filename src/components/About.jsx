@@ -10,9 +10,10 @@ export default function About() {
         <div data-aos="fade-right" className="space-y-5 text-lg leading-relaxed text-muted">
           <p>{profile.summary}</p>
           <p>
-            I recently earned my <span className="text-fg">B.Sc. in Computer Science</span> from AUL and I'm
-            currently a <span className="text-fg">Frontend Developer Intern at York Press</span>, where I build
-            modular React + TypeScript interfaces, connect them to REST APIs and work in a Git-based, Agile team.
+            I recently earned my <span className="text-fg">B.Sc. in Computer Science</span> from AUL and most
+            recently worked as a <span className="text-fg">Frontend Developer Intern at York Press</span>, where I
+            built modular React + TypeScript interfaces, connected them to REST APIs and worked in a Git-based, Agile
+            team.
           </p>
           <p>
             On my own projects I own the whole stack — designing MySQL schemas, building Express APIs with JWT

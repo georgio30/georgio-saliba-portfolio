@@ -23,7 +23,6 @@ export const experience = [
     company: 'York Press',
     period: '06/2026 – 09/2026',
     location: 'Zouk Mosbeh, Lebanon',
-    current: true,
     points: [
       'Developed and maintained responsive, reusable user interfaces using React.js, TypeScript, and modern JavaScript (ES6+).',
       'Built modular component-based architectures using React Hooks (useState, useEffect, useContext) for state management and lifecycle handling.',
