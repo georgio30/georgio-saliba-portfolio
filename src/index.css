@@ -4,8 +4,9 @@
 
 /* Light theme is the default; dark values override below */
 @theme {
-  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Instrument Serif", ui-serif, Georgia, serif;
+  /* The Arabic fonts only cover Arabic letters, so Latin text keeps Geist / Instrument Serif */
+  --font-sans: "Geist", "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Instrument Serif", "Amiri", ui-serif, Georgia, serif;
   --color-ink: #f7f6f2;          /* page background */
   --color-surface: #ffffff;      /* the few cards there are */
   --color-fg: #1b1a18;           /* primary text */
@@ -47,6 +48,11 @@ html {
 body {
   @apply bg-ink text-fg font-sans antialiased transition-colors duration-300;
   font-feature-settings: "ss01", "cv11";
+}
+
+/* Arabic has no italics and a faked slant reads badly; emphasis keeps its colour instead */
+:lang(ar) :is(em, .italic) {
+  font-style: normal;
 }
 
 ::selection {

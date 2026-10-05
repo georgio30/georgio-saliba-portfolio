@@ -1,7 +1,8 @@
+// Text shown on the site is either one value for every language or { en, fr, ar } (see src/i18n)
 export const profile = {
-  name: 'Georgio Saliba',
-  role: 'Full-Stack Developer',
-  location: 'Byblos, Lebanon',
+  name: { en: 'Georgio Saliba', fr: 'Georgio Saliba', ar: 'جورجيو صليبا' },
+  role: { en: 'Full-Stack Developer', fr: 'Développeur Full-Stack', ar: 'مطوّر Full-Stack' },
+  location: { en: 'Byblos, Lebanon', fr: 'Byblos, Liban', ar: 'جبيل، لبنان' },
   phone: '+961 71 503 736',
   phoneHref: 'tel:+96171503736',
   email: 'georgiosaliba@hotmail.com',
@@ -15,14 +16,26 @@ export const profile = {
 
 export const experience = [
   {
-    title: 'Frontend Developer Intern',
+    title: {
+      en: 'Frontend Developer Intern',
+      fr: 'Stagiaire développeur front-end',
+      ar: 'متدرّب في تطوير الواجهات الأمامية',
+    },
     company: 'York Press',
     period: '06/2026 – 09/2026',
-    location: 'Zouk Mosbeh, Lebanon',
+    location: { en: 'Zouk Mosbeh, Lebanon', fr: 'Zouk Mosbeh, Liban', ar: 'ذوق مصبح، لبنان' },
     // Shown in the Experience section; written from the points below
-    headline: 'React and TypeScript, in production.',
-    story:
-      'I worked on production code that real users rely on: reusable, responsive interfaces in React and TypeScript, state managed with hooks, and REST APIs wired in with proper loading and error states. Every change went through a branch, a pull request and a code review.',
+    headline: {
+      en: 'React and TypeScript, in production.',
+      fr: 'React et TypeScript, en production.',
+      ar: 'React وTypeScript، في بيئة الإنتاج.',
+    },
+    story: {
+      en: 'I worked on production code that real users rely on: reusable, responsive interfaces in React and TypeScript, state managed with hooks, and REST APIs wired in with proper loading and error states. Every change went through a branch, a pull request and a code review.',
+      fr: 'J’ai travaillé sur du code en production dont de vrais utilisateurs dépendent\u00a0: des interfaces réutilisables et responsives en React et TypeScript, un état géré avec les hooks, et des API REST branchées avec de vrais états de chargement et d’erreur. Chaque modification passait par une branche, une pull request et une revue de code.',
+      ar: 'عملتُ على شيفرة في بيئة الإنتاج يعتمد عليها مستخدمون حقيقيون: واجهات متجاوبة وقابلة لإعادة الاستخدام بـ React وTypeScript، وإدارة الحالة عبر الـ Hooks، وربط واجهات REST البرمجية مع معالجة سليمة لحالات التحميل والأخطاء. كل تعديل مرّ عبر فرع وطلب دمج ومراجعة للشيفرة.',
+    },
+    // CV wording, not shown on the site (English only)
     points: [
       'Developed and maintained responsive, reusable user interfaces using React.js, TypeScript, and modern JavaScript (ES6+).',
       'Built modular component-based architectures using React Hooks (useState, useEffect, useContext) for state management and lifecycle handling.',
@@ -33,13 +46,24 @@ export const experience = [
     tags: ['React', 'TypeScript', 'REST APIs', 'Git'],
   },
   {
-    title: 'Frontend Developer Intern',
+    title: {
+      en: 'Frontend Developer Intern',
+      fr: 'Stagiaire développeur front-end',
+      ar: 'متدرّب في تطوير الواجهات الأمامية',
+    },
     company: 'White Beard',
     period: '06/2024 – 09/2024',
-    location: 'Beirut, Lebanon',
-    headline: 'Layouts that hold up on every screen.',
-    story:
-      'I built responsive, accessible interfaces in HTML, CSS and JavaScript, added interactive features, and helped the team debug, test and maintain its web apps, including some of the database work behind them.',
+    location: { en: 'Beirut, Lebanon', fr: 'Beyrouth, Liban', ar: 'بيروت، لبنان' },
+    headline: {
+      en: 'Layouts that hold up on every screen.',
+      fr: 'Des mises en page qui tiennent sur tous les écrans.',
+      ar: 'تصاميم تصمد على كل الشاشات.',
+    },
+    story: {
+      en: 'I built responsive, accessible interfaces in HTML, CSS and JavaScript, added interactive features, and helped the team debug, test and maintain its web apps, including some of the database work behind them.',
+      fr: 'J’ai construit des interfaces responsives et accessibles en HTML, CSS et JavaScript, ajouté des fonctionnalités interactives, et aidé l’équipe à déboguer, tester et maintenir ses applications web, y compris une partie du travail sur les bases de données.',
+      ar: 'بنيتُ واجهات متجاوبة وسهلة الوصول بـ HTML وCSS وJavaScript، وأضفتُ ميزات تفاعلية، وساعدتُ الفريق في تصحيح تطبيقاته واختبارها وصيانتها، بما في ذلك بعض أعمال قواعد البيانات التي تقف خلفها.',
+    },
     points: [
       'Developed responsive and user-friendly web interfaces using HTML5, CSS3, and JavaScript following modern frontend practices.',
       'Created optimized layouts ensuring cross-device compatibility, accessibility, and consistent UX across screen sizes.',
@@ -47,7 +71,7 @@ export const experience = [
       'Collaborated with team members to debug issues, test new features, and maintain existing web applications.',
       'Assisted with data management and database-related tasks to support application functionality.',
     ],
-    tags: ['HTML5', 'CSS3', 'JavaScript', 'Accessibility'],
+    tags: ['HTML5', 'CSS3', 'JavaScript', { en: 'Accessibility', fr: 'Accessibilité', ar: 'سهولة الوصول' }],
   },
 ]
 
@@ -59,7 +83,18 @@ export const skills = [
 ]
 
 // The short list shown in About; `skills` above is the full CV version
-export const toolbox = ['React', 'TypeScript', 'Node.js', 'Express', 'MySQL', 'REST APIs', 'JWT & role-based access', 'Tailwind CSS', 'React Native', 'Git']
+export const toolbox = [
+  'React',
+  'TypeScript',
+  'Node.js',
+  'Express',
+  'MySQL',
+  'REST APIs',
+  { en: 'JWT & role-based access', fr: 'JWT et accès par rôle', ar: 'JWT وصلاحيات حسب الدور' },
+  'Tailwind CSS',
+  'React Native',
+  'Git',
+]
 
 export const education = {
   degree: 'Bachelor of Science – Computer Science',
@@ -69,7 +104,7 @@ export const education = {
 }
 
 export const languages = [
-  { name: 'Arabic', level: 'Native' },
-  { name: 'English', level: 'Proficient' },
-  { name: 'French', level: 'Proficient' },
+  { name: { en: 'Arabic', fr: 'Arabe', ar: 'العربية' }, level: 'Native' },
+  { name: { en: 'English', fr: 'Anglais', ar: 'الإنجليزية' }, level: 'Proficient' },
+  { name: { en: 'French', fr: 'Français', ar: 'الفرنسية' }, level: 'Proficient' },
 ]

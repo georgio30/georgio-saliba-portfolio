@@ -1,8 +1,11 @@
+import { useI18n } from '../i18n'
+
 const srcSet = (name) => `/images/projects/${name}-800.webp 800w, /images/projects/${name}-1600.webp 1600w`
 
 // A project screenshot made by `npm run images` (see src/data/projects.js).
 // `phone` swaps in a different screenshot on small screens.
 export default function Screenshot({ shot, phone, sizes, eager = false, className = '' }) {
+  const { pick } = useI18n()
   return (
     <picture className="block size-full">
       {phone && <source media="(max-width: 767px)" srcSet={srcSet(phone.name)} sizes="90vw" />}
@@ -10,7 +13,7 @@ export default function Screenshot({ shot, phone, sizes, eager = false, classNam
         src={`/images/projects/${shot.name}-800.webp`}
         srcSet={srcSet(shot.name)}
         sizes={sizes}
-        alt={shot.alt}
+        alt={pick(shot.alt)}
         loading={eager ? 'eager' : 'lazy'}
         decoding="async"
         draggable="false"

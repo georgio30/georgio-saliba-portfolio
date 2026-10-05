@@ -3,11 +3,13 @@ import { createPortal } from 'react-dom'
 import ProjectGallery from './ProjectGallery'
 import { gallerySlides } from '../lib/gallery'
 import { useReducedMotion } from '../lib/hooks'
+import { useI18n } from '../i18n'
 
 const pad = (n) => String(n).padStart(2, '0')
 
 export default function ProjectModal({ projects, index, onIndexChange, onClose }) {
   const project = projects[index]
+  const { t, pick, dir } = useI18n()
   const reduced = useReducedMotion()
   const [shown, setShown] = useState(false)
   const [slide, setSlide] = useState(0)
@@ -44,13 +46,14 @@ export default function ProjectModal({ projects, index, onIndexChange, onClose }
 
   useEffect(() => {
     const onKey = (e) => {
+      // Arrow keys follow the reading direction: right to left, ← is "next"
+      const step = ({ ArrowRight: 1, ArrowLeft: -1 }[e.key] ?? 0) * (dir === 'rtl' ? -1 : 1)
       if (e.key === 'Escape') close()
-      else if (e.key === 'ArrowRight' && slides > 1) setSlide((s) => (s + 1) % slides)
-      else if (e.key === 'ArrowLeft' && slides > 1) setSlide((s) => (s - 1 + slides) % slides)
+      else if (step && slides > 1) setSlide((s) => (s + step + slides) % slides)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [close, slides])
+  }, [close, slides, dir])
 
   const showProject = (i) => {
     onIndexChange(i)
@@ -84,14 +87,14 @@ export default function ProjectModal({ projects, index, onIndexChange, onClose }
         >
           <header className="mb-5 flex items-center justify-between sm:mb-6">
             <p className="text-sm text-muted">
-              Project <span className="tabular-nums text-fg">{pad(index + 1)}</span>{' '}
+              {t.project.project} <span className="tabular-nums text-fg">{pad(index + 1)}</span>{' '}
               <span className="tabular-nums">/ {pad(projects.length)}</span>
             </p>
             <button
               ref={closeRef}
               type="button"
               onClick={close}
-              aria-label="Close project"
+              aria-label={t.project.close}
               className="flex size-10 items-center justify-center rounded-full border border-line text-xl leading-none text-fg transition-colors duration-200 hover:border-fg/30 hover:bg-fg/5"
             >
               ×
@@ -105,23 +108,23 @@ export default function ProjectModal({ projects, index, onIndexChange, onClose }
           <div className="mt-10 grid gap-10 md:mt-12 md:grid-cols-[1fr_17rem] md:gap-16">
             <div>
               <h2 id="project-title" className="font-display text-4xl leading-tight text-fg md:text-5xl">
-                {project.title}
+                {pick(project.title)}
               </h2>
-              <p className="mt-4 max-w-xl text-lg leading-relaxed text-muted">{project.description}</p>
+              <p className="mt-4 max-w-xl text-lg leading-relaxed text-muted">{pick(project.description)}</p>
             </div>
 
             <div className="space-y-8">
               <dl className="space-y-3 text-sm">
                 <div className="flex gap-3">
-                  <dt className="w-12 shrink-0 text-muted">Year</dt>
+                  <dt className="w-16 shrink-0 text-muted">{t.project.year}</dt>
                   <dd className="tabular-nums text-fg">{project.year}</dd>
                 </div>
                 <div className="flex gap-3">
-                  <dt className="w-12 shrink-0 text-muted">Type</dt>
-                  <dd className="text-fg">{project.type}</dd>
+                  <dt className="w-16 shrink-0 text-muted">{t.project.type}</dt>
+                  <dd className="text-fg">{pick(project.type)}</dd>
                 </div>
                 <div className="flex gap-3">
-                  <dt className="w-12 shrink-0 text-muted">Stack</dt>
+                  <dt className="w-16 shrink-0 text-muted">{t.project.stack}</dt>
                   <dd className="leading-relaxed text-fg">{project.technologies.join(' · ')}</dd>
                 </div>
               </dl>
@@ -135,8 +138,8 @@ export default function ProjectModal({ projects, index, onIndexChange, onClose }
                       rel="noreferrer"
                       className="group flex items-center justify-between rounded-full bg-fg px-5 py-3 text-sm font-medium text-ink transition-colors duration-200 hover:bg-accent hover:text-on-accent"
                     >
-                      Live website
-                      <span aria-hidden="true" className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
+                      {t.project.live}
+                      <span aria-hidden="true" className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 rtl:-scale-x-100 rtl:group-hover:-translate-x-0.5">
                         ↗
                       </span>
                     </a>
@@ -148,8 +151,8 @@ export default function ProjectModal({ projects, index, onIndexChange, onClose }
                       rel="noreferrer"
                       className="group flex items-center justify-between rounded-full border border-line px-5 py-3 text-sm font-medium text-fg transition-colors duration-200 hover:border-fg/30"
                     >
-                      View source on GitHub
-                      <span aria-hidden="true" className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
+                      {t.project.source}
+                      <span aria-hidden="true" className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 rtl:-scale-x-100 rtl:group-hover:-translate-x-0.5">
                         ↗
                       </span>
                     </a>
@@ -157,7 +160,7 @@ export default function ProjectModal({ projects, index, onIndexChange, onClose }
                 </div>
               ) : (
                 <p className="border-t border-line pt-4 text-sm leading-relaxed text-muted">
-                  No public repository or live link for this one yet. Happy to walk you through it.
+                  {t.project.noLinks}
                 </p>
               )}
             </div>
@@ -167,12 +170,12 @@ export default function ProjectModal({ projects, index, onIndexChange, onClose }
             <button
               type="button"
               onClick={() => showProject(next)}
-              className="group flex w-full items-baseline justify-between gap-4 text-left"
+              className="group flex w-full items-baseline justify-between gap-4 text-start"
             >
-              <span className="text-sm text-muted">Next project</span>
+              <span className="text-sm text-muted">{t.project.next}</span>
               <span className="font-display text-2xl text-fg transition-colors duration-200 group-hover:text-accent">
-                {projects[next].title}{' '}
-                <span aria-hidden="true" className="inline-block transition-transform duration-300 group-hover:translate-x-1">
+                {pick(projects[next].title)}{' '}
+                <span aria-hidden="true" className="inline-block transition-transform duration-300 group-hover:translate-x-1 rtl:-scale-x-100 rtl:group-hover:-translate-x-1">
                   →
                 </span>
               </span>

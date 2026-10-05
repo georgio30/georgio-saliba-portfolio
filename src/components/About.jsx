@@ -2,54 +2,47 @@ import Reveal from './Reveal'
 import Section from './Section'
 import { education, languages, profile, toolbox } from '../data/resume'
 import { useBeirutTime } from '../lib/hooks'
+import { useI18n } from '../i18n'
 
 const year = (period) => period.slice(-4)
 
 export default function About() {
+  const { t, pick } = useI18n()
   const time = useBeirutTime()
 
   const facts = [
     {
-      label: 'Based in',
+      label: t.about.basedIn,
       value: (
         <>
-          {profile.location} <span className="text-muted">· it's {time} here</span>
+          {pick(profile.location)} <span className="text-muted">· {t.about.timeHere(time)}</span>
         </>
       ),
     },
-    { label: 'Studied', value: `B.Sc. Computer Science, AUL (${education.period.slice(3, 7)}–${year(education.period)})` },
-    { label: 'Speaks', value: languages.map((l) => l.name).join(', ') },
+    { label: t.about.studied, value: t.about.degree(education.period.slice(3, 7), year(education.period)) },
+    { label: t.about.speaks, value: languages.map((l) => pick(l.name)).join(t.comma) },
   ]
 
   return (
-    <Section id="about" label="About">
+    <Section id="about" label={t.about.label}>
       <div className="grid gap-14 lg:grid-cols-[1.15fr_1fr] lg:gap-20">
         <Reveal>
-          <p className="font-display text-3xl leading-[1.25] text-fg md:text-4xl">
-            I'm Georgio, a developer from Lebanon who likes owning the whole thing: the tables, the API, and the last
-            hover state.
-          </p>
+          <p className="font-display text-3xl leading-[1.25] text-fg md:text-4xl rtl:leading-[1.5]">{t.about.intro}</p>
 
-          <h3 className="mt-12 text-sm text-muted">What I enjoy building</h3>
+          <h3 className="mt-12 text-sm text-muted">{t.about.enjoy}</h3>
           <ul className="mt-4 space-y-3 text-fg">
-            <li className="flex gap-3">
-              <span aria-hidden="true" className="mt-[0.7em] h-px w-3 shrink-0 bg-accent-soft" />
-              Complete apps, from the database schema up to the interface
-            </li>
-            <li className="flex gap-3">
-              <span aria-hidden="true" className="mt-[0.7em] h-px w-3 shrink-0 bg-accent-soft" />
-              Secure sign-in: JWT authentication and role-based access
-            </li>
-            <li className="flex gap-3">
-              <span aria-hidden="true" className="mt-[0.7em] h-px w-3 shrink-0 bg-accent-soft" />
-              Interfaces that hold up on every screen size
-            </li>
+            {t.about.enjoyList.map((item) => (
+              <li key={item} className="flex gap-3">
+                <span aria-hidden="true" className="mt-[0.7em] h-px w-3 shrink-0 bg-accent-soft" />
+                {item}
+              </li>
+            ))}
           </ul>
 
           {profile.learning?.length > 0 && (
             <>
-              <h3 className="mt-10 text-sm text-muted">Currently learning</h3>
-              <p className="mt-3 text-fg">{profile.learning.join(', ')}</p>
+              <h3 className="mt-10 text-sm text-muted">{t.about.learning}</h3>
+              <p className="mt-3 text-fg">{profile.learning.map(pick).join(t.comma)}</p>
             </>
           )}
         </Reveal>
@@ -64,9 +57,9 @@ export default function About() {
             ))}
           </dl>
 
-          <h3 className="mt-10 text-sm text-muted">Usually reaching for</h3>
+          <h3 className="mt-10 text-sm text-muted">{t.about.toolbox}</h3>
           <p className="mt-3 leading-relaxed text-fg">
-            {toolbox.join(' · ')}
+            {toolbox.map(pick).join(' · ')}
           </p>
         </Reveal>
       </div>

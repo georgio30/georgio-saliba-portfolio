@@ -3,6 +3,7 @@ import ProjectCard from './ProjectCard'
 import ProjectModal from './ProjectModal'
 import { projects } from '../data/projects'
 import { useMediaQuery, useReducedMotion } from '../lib/hooks'
+import { useI18n } from '../i18n'
 
 const pad = (n) => String(n).padStart(2, '0')
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v))
@@ -43,6 +44,7 @@ function sectionScroll(section) {
 }
 
 export default function ProjectShowcase() {
+  const { t } = useI18n()
   const reduced = useReducedMotion()
   const compact = !useMediaQuery('(min-width: 768px)')
   const [open, setOpen] = useState(null)
@@ -111,8 +113,8 @@ export default function ProjectShowcase() {
 
   if (reduced) {
     return (
-      <section id="work" aria-label="Selected work" className="mx-auto max-w-4xl px-5 py-24 sm:px-8">
-        <p className="mb-12 text-sm text-muted">Selected work</p>
+      <section id="work" aria-label={t.work.label} className="mx-auto max-w-4xl px-5 py-24 sm:px-8">
+        <p className="mb-12 text-sm text-muted">{t.work.label}</p>
         <ol className="space-y-20">
           {projects.map((project, i) => (
             <li key={project.slug}>
@@ -129,14 +131,14 @@ export default function ProjectShowcase() {
     <section
       id="work"
       ref={sectionRef}
-      aria-label="Selected work"
+      aria-label={t.work.label}
       className="relative"
       style={{ height: `${100 + TOTAL * 100}vh` }}
     >
       <div className="sticky top-0 h-[100svh] overflow-clip">
         <div className="absolute inset-x-0 top-20 z-[3000] mx-auto flex max-w-6xl items-baseline justify-between px-5 text-sm text-muted sm:px-8 md:top-24">
-          <span>Selected work</span>
-          <span className="tabular-nums" aria-hidden="true">
+          <span>{t.work.label}</span>
+          <span className="tabular-nums" aria-hidden="true" dir="ltr">
             <span ref={counterRef} className="text-fg">
               01
             </span>{' '}
@@ -168,10 +170,10 @@ export default function ProjectShowcase() {
 
         <div className="absolute inset-x-0 bottom-8 z-[3000] mx-auto flex max-w-6xl items-center gap-6 px-5 sm:px-8">
           <div className="relative h-px flex-1 bg-line">
-            <div ref={barRef} className="absolute inset-0 origin-left scale-x-0 bg-accent" />
+            <div ref={barRef} className="absolute inset-0 origin-left scale-x-0 bg-accent rtl:origin-right" />
           </div>
           <span ref={hintRef} aria-hidden="true" className="text-xs text-muted transition-opacity duration-500">
-            Keep scrolling
+            {t.work.keepScrolling}
           </span>
         </div>
       </div>

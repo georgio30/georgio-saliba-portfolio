@@ -2,13 +2,19 @@ import { useRef, useState } from 'react'
 import Screenshot from './Screenshot'
 import { ProjectCover, ProjectLayers } from './ProjectCover'
 import { gallerySlides } from '../lib/gallery'
+import { useI18n } from '../i18n'
 
 export default function ProjectGallery({ project, number, index, onChange }) {
+  const { t, pick, dir } = useI18n()
   const slides = gallerySlides(project)
   const many = slides.length > 1
+  // Right to left, the next slide comes in from the left
+  const rtl = dir === 'rtl' ? -1 : 1
   const [drag, setDrag] = useState(0)
   const start = useRef(null)
   const go = (i) => onChange((i + slides.length) % slides.length)
+  const caption = (slide) =>
+    slide.kind === 'shot' ? pick(slide.shot.alt) : slide.kind === 'cover' ? t.gallery.cover : t.gallery.layers
 
   // Swipe: follow the finger, then settle on the nearest slide
   const onPointerDown = (e) => {
@@ -27,7 +33,7 @@ export default function ProjectGallery({ project, number, index, onChange }) {
   }
   const onPointerEnd = () => {
     if (!start.current) return
-    if (Math.abs(drag) > 50) go(index + (drag < 0 ? 1 : -1))
+    if (Math.abs(drag) > 50) go(index + (drag * rtl < 0 ? 1 : -1))
     start.current = null
     setDrag(0)
   }
@@ -41,11 +47,11 @@ export default function ProjectGallery({ project, number, index, onChange }) {
         onPointerUp={onPointerEnd}
         onPointerCancel={onPointerEnd}
         aria-roledescription="carousel"
-        aria-label={`${project.title} images`}
+        aria-label={t.gallery.images(pick(project.title))}
       >
         <div
           className={`flex h-full ${drag ? '' : 'transition-transform duration-500 ease-[cubic-bezier(0.22,0.61,0.36,1)]'}`}
-          style={{ transform: `translateX(calc(${-index * 100}% + ${drag}px))` }}
+          style={{ transform: `translateX(calc(${-index * rtl * 100}% + ${drag}px))` }}
         >
           {slides.map((slide, i) => (
             <div
@@ -53,7 +59,7 @@ export default function ProjectGallery({ project, number, index, onChange }) {
               className="h-full w-full shrink-0"
               aria-hidden={i !== index}
               aria-roledescription="slide"
-              aria-label={`${i + 1} of ${slides.length}`}
+              aria-label={t.gallery.slide(i + 1, slides.length)}
             >
               {slide.kind === 'shot' && (
                 <Screenshot shot={slide.shot} eager={Math.abs(i - index) <= 1} sizes="(min-width: 1100px) 1040px, 94vw" />
@@ -67,7 +73,7 @@ export default function ProjectGallery({ project, number, index, onChange }) {
 
       <div className="mt-4 flex items-center justify-between gap-4">
         <p className="min-w-0 truncate text-sm text-muted" aria-live="polite">
-          {slides[index].caption}
+          {caption(slides[index])}
         </p>
 
         {many && (
@@ -75,17 +81,19 @@ export default function ProjectGallery({ project, number, index, onChange }) {
             <button
               type="button"
               onClick={() => go(index - 1)}
-              aria-label="Previous image"
+              aria-label={t.gallery.previous}
               className="flex size-9 items-center justify-center rounded-full text-fg transition-colors hover:bg-fg/5"
             >
-              ←
+              <span aria-hidden="true" className="rtl:-scale-x-100">
+                ←
+              </span>
             </button>
             {slides.map((_, i) => (
               <button
                 key={i}
                 type="button"
                 onClick={() => go(i)}
-                aria-label={`Show image ${i + 1} of ${slides.length}`}
+                aria-label={t.gallery.show(i + 1, slides.length)}
                 aria-current={i === index ? 'true' : undefined}
                 className="group flex size-6 items-center justify-center"
               >
@@ -99,10 +107,12 @@ export default function ProjectGallery({ project, number, index, onChange }) {
             <button
               type="button"
               onClick={() => go(index + 1)}
-              aria-label="Next image"
+              aria-label={t.gallery.next}
               className="flex size-9 items-center justify-center rounded-full text-fg transition-colors hover:bg-fg/5"
             >
-              →
+              <span aria-hidden="true" className="rtl:-scale-x-100">
+                →
+              </span>
             </button>
           </div>
         )}

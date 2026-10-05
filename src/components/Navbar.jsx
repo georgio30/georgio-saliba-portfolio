@@ -1,18 +1,21 @@
 import { useEffect, useRef, useState } from 'react'
 import Icon from './Icons'
 import ThemeToggle from './ThemeToggle'
+import LanguageSwitcher from './LanguageSwitcher'
 import { profile } from '../data/resume'
+import { useI18n } from '../i18n'
 
 const links = [
-  { id: 'work', label: 'Work' },
-  { id: 'experience', label: 'Experience' },
-  { id: 'about', label: 'About' },
-  { id: 'github', label: 'GitHub', href: profile.github },
-  { id: 'contact', label: 'Contact' },
+  { id: 'work' },
+  { id: 'experience' },
+  { id: 'about' },
+  { id: 'github', href: profile.github },
+  { id: 'contact' },
 ]
 const sections = ['home', 'work', 'experience', 'about', 'contact']
 
 function NavLink({ link, active, className, onClick, tabIndex }) {
+  const { t } = useI18n()
   const external = Boolean(link.href)
   return (
     <a
@@ -24,9 +27,9 @@ function NavLink({ link, active, className, onClick, tabIndex }) {
       tabIndex={tabIndex}
       className={className}
     >
-      {link.label}
+      {t.nav[link.id]}
       {external && (
-        <span aria-hidden="true" className="ml-0.5 text-[0.8em] text-muted">
+        <span aria-hidden="true" className="ms-0.5 inline-block text-[0.8em] text-muted rtl:-scale-x-100">
           ↗
         </span>
       )}
@@ -35,6 +38,7 @@ function NavLink({ link, active, className, onClick, tabIndex }) {
 }
 
 export default function Navbar() {
+  const { t } = useI18n()
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState('')
@@ -86,7 +90,7 @@ export default function Navbar() {
       }`}
     >
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-8">
-        <a href="#home" className="font-display text-2xl text-fg">
+        <a href="#home" dir="ltr" className="font-display text-2xl text-fg">
           Georgio<span className="text-accent-soft">.</span>
         </a>
 
@@ -105,13 +109,16 @@ export default function Navbar() {
             ))}
           </ul>
 
-          <ThemeToggle />
+          <div className="flex items-center gap-1">
+            <LanguageSwitcher />
+            <ThemeToggle />
+          </div>
 
           <button
             type="button"
             onClick={() => setOpen((o) => !o)}
             className="rounded-full p-2 text-fg transition-colors hover:bg-fg/5 md:hidden"
-            aria-label={open ? 'Close menu' : 'Open menu'}
+            aria-label={open ? t.nav.closeMenu : t.nav.openMenu}
             aria-expanded={open}
           >
             <Icon name={open ? 'close' : 'menu'} className="size-5" />
@@ -145,7 +152,7 @@ export default function Navbar() {
         className={`h-px transition-colors duration-300 ${scrolled || open ? 'bg-line' : 'bg-transparent'}`}
         aria-hidden="true"
       >
-        <div ref={progressRef} className="h-px origin-left scale-x-0 bg-accent" />
+        <div ref={progressRef} className="h-px origin-left scale-x-0 bg-accent rtl:origin-right" />
       </div>
     </header>
   )

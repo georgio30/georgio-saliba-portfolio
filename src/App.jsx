@@ -7,8 +7,11 @@ import About from './components/About'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
 import { profile } from './data/resume'
+import { useI18n } from './i18n'
 
 export default function App() {
+  const { t } = useI18n()
+
   // A small hello for anyone who opens the dev tools
   useEffect(() => {
     console.log(
@@ -22,9 +25,9 @@ export default function App() {
     <>
       <a
         href="#main"
-        className="fixed top-3 left-3 z-[60] -translate-y-20 rounded-full bg-fg px-4 py-2 text-sm font-medium text-ink transition-transform focus:translate-y-0"
+        className="fixed start-3 top-3 z-[60] -translate-y-20 rounded-full bg-fg px-4 py-2 text-sm font-medium text-ink transition-transform focus:translate-y-0"
       >
-        Skip to content
+        {t.skip}
       </a>
       <Navbar />
       <main id="main" tabIndex={-1} className="outline-none">

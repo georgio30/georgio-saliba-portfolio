@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import Screenshot from './Screenshot'
 import { ProjectCover } from './ProjectCover'
+import { useI18n } from '../i18n'
 
 // The project's face: its first screenshot, or a generated cover
 export function ProjectVisual({ project, number, eager }) {
@@ -18,8 +19,10 @@ export function ProjectVisual({ project, number, eager }) {
 }
 
 export default function ProjectCard({ project, number, onOpen, onFocus, eager = false, interactive = true }) {
+  const { t, pick } = useI18n()
   const tiltRef = useRef(null)
   const pillRef = useRef(null)
+  const title = pick(project.title)
 
   // Depth on hover: tilt a few degrees toward the pointer and drift the image
   const onPointerMove = (e) => {
@@ -45,8 +48,8 @@ export default function ProjectCard({ project, number, onOpen, onFocus, eager = 
       onFocus={onFocus}
       onPointerMove={onPointerMove}
       onPointerLeave={onPointerLeave}
-      aria-label={`Open project ${number}: ${project.title}`}
-      className="group block w-full cursor-pointer text-left [perspective:1200px] focus-visible:outline-offset-8"
+      aria-label={t.work.openProject(number, title)}
+      className="group block w-full cursor-pointer text-start [perspective:1200px] focus-visible:outline-offset-8"
     >
       <div
         ref={tiltRef}
@@ -58,34 +61,37 @@ export default function ProjectCard({ project, number, onOpen, onFocus, eager = 
           </div>
         </div>
 
-        {/* Follows the cursor on desktop */}
+        {/* Follows the cursor on desktop (physical left/top: it's placed from clientX/Y) */}
         <span
           ref={pillRef}
           aria-hidden="true"
           className="pointer-events-none absolute top-0 left-0 hidden -translate-x-1/2 -translate-y-1/2 scale-75 rounded-full bg-fg px-4 py-2 text-xs font-medium whitespace-nowrap text-ink opacity-0 transition-[opacity,scale] duration-300 ease-out group-hover:scale-100 group-hover:opacity-100 pointer-fine:block"
         >
-          View project
+          {t.work.viewProject}
         </span>
       </div>
 
       <span className="mt-5 flex flex-wrap items-baseline [opacity:var(--meta,1)] justify-between gap-x-6 gap-y-2 md:mt-6">
         <div className="flex items-baseline gap-4">
           <span className="text-sm tabular-nums text-muted">{number}</span>
-          <span className="font-display text-2xl leading-tight text-fg md:text-3xl">{project.title}</span>
+          <span className="font-display text-2xl leading-tight text-fg md:text-3xl">{title}</span>
           {project.note && (
             <span className="hidden rounded-full border border-line px-2.5 py-0.5 text-xs text-muted sm:inline">
-              {project.note}
+              {pick(project.note)}
             </span>
           )}
         </div>
         <span className="inline-flex items-center gap-2 text-sm font-medium text-fg">
-          Explore
-          <span aria-hidden="true" className="text-accent transition-transform duration-300 ease-out group-hover:translate-x-1">
+          {t.work.explore}
+          <span
+            aria-hidden="true"
+            className="text-accent transition-transform duration-300 ease-out group-hover:translate-x-1 rtl:-scale-x-100 rtl:group-hover:-translate-x-1"
+          >
             →
           </span>
         </span>
       </span>
-      <span className="mt-2 block pl-8 [opacity:var(--meta,1)] text-sm text-muted md:pl-9">{project.technologies.join(' · ')}</span>
+      <span className="mt-2 block ps-8 [opacity:var(--meta,1)] text-sm text-muted md:ps-9">{project.technologies.join(' · ')}</span>
     </button>
   )
 }

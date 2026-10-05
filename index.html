@@ -7,7 +7,7 @@
     <meta name="description" content="Georgio Saliba — Full-Stack Developer building end-to-end web apps with React, TypeScript, Node.js, Express and MySQL." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans+Arabic:wght@400;500&family=Amiri&display=swap" rel="stylesheet" />
     <title>Georgio Saliba | Full-Stack Developer</title>
     <link rel="canonical" href="https://georgio-saliba-portfolio.vercel.app/" />
     <meta name="theme-color" content="#f7f6f2" media="(prefers-color-scheme: light)" />
@@ -47,6 +47,16 @@
           theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
         }
         document.documentElement.classList.toggle('dark', theme === 'dark')
+      })()
+      // Same for the language (en / fr / ar): saved choice, else the browser's, else English
+      ;(function () {
+        var supported = ['en', 'fr', 'ar']
+        var lang
+        try { lang = localStorage.getItem('lang') } catch (e) {}
+        if (supported.indexOf(lang) < 0) lang = (navigator.language || '').slice(0, 2).toLowerCase()
+        if (supported.indexOf(lang) < 0) lang = 'en'
+        document.documentElement.lang = lang
+        document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr'
       })()
     </script>
   </head>
