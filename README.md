@@ -20,6 +20,7 @@ Scroll past the hero and the projects move through a quiet 3D space: the one in 
 - **3D scroll gallery:** projects are placed with CSS 3D transforms driven by scroll position (no animation or 3D library). Phones get a flatter, shallower version; *prefers-reduced-motion* gets a plain list
 - **Project lightbox:** multiple screenshots with arrows, dots, swipe and keyboard; Escape to close; the page behind is locked, keeps its scroll position and gets focus back when you close it
 - **Per-project links:** "Live website" and "View source on GitHub" point to that project's own site and repository, and are only shown when they exist
+- **English, French and Arabic:** a language switcher in the navbar, remembered per visitor (first visits follow the browser language). Arabic is fully right to left: mirrored layout and arrows, direction-aware gallery swipes and arrow keys, and Arabic fonts (IBM Plex Sans Arabic, Amiri). Built in, with no i18n library
 - **Light / dark mode:** light by default (dark if the system prefers it), remembers the visitor's choice, no flash on load
 - **Responsive images:** screenshots are served as WebP at 800 and 1600 px and lazy-loaded; a project can mark one screenshot as its phone version for the portrait card on small screens
 - **Sharing and search:** link preview image and tags, structured data about Georgio, a custom 404 page and a skip-to-content link
@@ -50,6 +51,23 @@ Scroll past the hero and the projects move through a quiet 3D space: the one in 
 ```
 
 A project with no screenshots gets a generated cover (and a "how it's put together" panel if it has `layers`).
+
+To translate a field, give it one value per language instead of a string. Anything left as a plain string is shown as-is in every language, and a missing language falls back to English:
+
+```js
+summary: {
+  en: 'One line for the card.',
+  fr: 'Une ligne pour la carte.',
+  ar: 'سطر واحد للبطاقة.',
+},
+```
+
+## Translations
+
+- Interface text (nav, buttons, headings, labels) lives in [`src/i18n/en.js`](src/i18n/en.js), [`fr.js`](src/i18n/fr.js) and [`ar.js`](src/i18n/ar.js). Each file has the same keys.
+- Project and CV text is translated next to the data, in [`src/data/projects.js`](src/data/projects.js) and [`src/data/resume.js`](src/data/resume.js), using the `{ en, fr, ar }` form above.
+- Components read both through the `useI18n()` hook: `t` for interface text, `pick(field)` for data fields.
+- For right-to-left support, use logical Tailwind classes (`ms-`, `ps-`, `start-`, `text-start`) instead of left/right ones, and `rtl:` variants where something must flip (for example `rtl:-scale-x-100` on an arrow).
 
 ## Tech stack
 
@@ -90,6 +108,9 @@ src/
 ├── data/
 │   ├── projects.js         # Every project shown in the gallery
 │   └── resume.js           # Profile, experience, skills
+├── i18n/
+│   ├── index.jsx           # Language provider and useI18n() hook
+│   └── en.js, fr.js, ar.js # Interface text per language
 ├── lib/                    # Shared hooks and gallery helper
 └── components/
     ├── Navbar.jsx          # Sticky nav, active section, scroll progress
@@ -103,6 +124,7 @@ src/
     ├── About.jsx
     ├── Contact.jsx
     ├── Footer.jsx
+    ├── LanguageSwitcher.jsx # EN · FR · ع in the navbar
     └── ...                 # Section, Reveal, Screenshot, ThemeToggle, Icons
 scripts/optimize-images.mjs
 images-src/projects/        # Original screenshots
