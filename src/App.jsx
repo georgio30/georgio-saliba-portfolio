@@ -9,6 +9,7 @@ import Play from './components/Play'
 import Craft from './components/Craft'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
+import Chat from './components/Chat'
 import { profile } from './data/resume'
 import { useI18n } from './i18n'
 
@@ -44,6 +45,7 @@ export default function App() {
         <Contact />
       </main>
       <Footer />
+      <Chat />
     </>
   )
 }

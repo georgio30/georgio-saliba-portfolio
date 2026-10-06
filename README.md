@@ -23,6 +23,7 @@ Scroll past the hero and the projects move through a quiet 3D space: the one in 
 - **Interactive About:** tabs for what I'm building, what I'm experimenting with and the technologies I enjoy; pick a technology to see which projects and jobs used it (worked out from the project and CV data, so it stays true)
 - **Now:** a small dated note on what's happening at the moment
 - **Play:** a small Snake game where every bite is one of the tools I work with. Arrow keys, WASD, swipes or on-screen buttons; pauses by itself when scrolled out of view; results announced to screen readers; best score kept on the device
+- **Ask about me:** a small floating chat with five ready-written questions and answers about Georgio (no AI and no API key), each with a button to the right section. Keyboard accessible, answers announced to screen readers, follows the language switch
 - **Under the hood:** performance, responsive design, accessibility, three languages, Arabic RTL, the problems solved along the way, and a live readout of this visit (viewport, language and direction, theme, motion setting, first paint, load time, JavaScript size) read from the browser
 - **Per-project links:** "Live website" and "View source on GitHub" point to that project's own site and repository, and are only shown when they exist
 - **English, French and Arabic:** a language switcher in the navbar, remembered per visitor (first visits follow the browser language). Arabic is fully right to left: mirrored layout and arrows, direction-aware gallery swipes and arrow keys, and Arabic fonts (IBM Plex Sans Arabic, Amiri). Built in, with no i18n library
@@ -81,6 +82,7 @@ summary: {
 
 - [`src/data/now.js`](src/data/now.js): the "Now" note (change `nowUpdated` when you edit it) and the About tabs.
 - [`src/data/craft.js`](src/data/craft.js): the "Under the hood" points and challenges.
+- [`src/data/chat.js`](src/data/chat.js): the chat's questions and answers.
 
 ## Translations
 
@@ -148,6 +150,7 @@ src/
     ├── Now.jsx
     ├── Play.jsx            # The Snake game
     ├── Craft.jsx           # Under the hood, with the live readout
+    ├── Chat.jsx            # The floating "ask about me" chat
     ├── Contact.jsx
     ├── Footer.jsx
     ├── LanguageSwitcher.jsx # EN · FR · ع in the navbar

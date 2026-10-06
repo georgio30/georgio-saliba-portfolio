@@ -24,9 +24,9 @@ export const now = [
   {
     label: { en: 'Open to', fr: 'Ouvert à', ar: 'متاح لـ' },
     text: {
-      en: 'Full-stack and front-end roles, and projects worth building well.',
-      fr: 'Des postes full-stack et front-end, et des projets qui méritent d’être bien construits.',
-      ar: 'وظائف Full-Stack وواجهات أمامية، ومشاريع تستحق أن تُبنى جيدًا.',
+      en: 'Full-stack roles, from database to interface, and projects worth building well.',
+      fr: 'Des postes full-stack, de la base de données à l’interface, et des projets qui méritent d’être bien construits.',
+      ar: 'وظائف Full-Stack، من قاعدة البيانات إلى الواجهة، ومشاريع تستحق أن تُبنى جيدًا.',
     },
   },
 ]
