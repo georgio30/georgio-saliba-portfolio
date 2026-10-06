@@ -9,10 +9,12 @@ const links = [
   { id: 'work' },
   { id: 'experience' },
   { id: 'about' },
+  { id: 'play' },
+  { id: 'craft' },
   { id: 'github', href: profile.github },
   { id: 'contact' },
 ]
-const sections = ['home', 'work', 'experience', 'about', 'contact']
+const sections = ['home', 'work', 'experience', 'about', 'play', 'craft', 'contact']
 
 function NavLink({ link, active, className, onClick, tabIndex }) {
   const { t } = useI18n()

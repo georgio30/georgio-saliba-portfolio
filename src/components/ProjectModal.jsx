@@ -9,6 +9,7 @@ const pad = (n) => String(n).padStart(2, '0')
 
 export default function ProjectModal({ projects, index, onIndexChange, onClose }) {
   const project = projects[index]
+  const study = project.caseStudy
   const { t, pick, dir } = useI18n()
   const reduced = useReducedMotion()
   const [shown, setShown] = useState(false)
@@ -123,10 +124,12 @@ export default function ProjectModal({ projects, index, onIndexChange, onClose }
                   <dt className="w-16 shrink-0 text-muted">{t.project.type}</dt>
                   <dd className="text-fg">{pick(project.type)}</dd>
                 </div>
-                <div className="flex gap-3">
-                  <dt className="w-16 shrink-0 text-muted">{t.project.stack}</dt>
-                  <dd className="leading-relaxed text-fg">{project.technologies.join(' · ')}</dd>
-                </div>
+                {!study && (
+                  <div className="flex gap-3">
+                    <dt className="w-16 shrink-0 text-muted">{t.project.stack}</dt>
+                    <dd className="leading-relaxed text-fg">{project.technologies.join(' · ')}</dd>
+                  </div>
+                )}
               </dl>
 
               {project.live || project.github ? (
@@ -165,6 +168,51 @@ export default function ProjectModal({ projects, index, onIndexChange, onClose }
               )}
             </div>
           </div>
+
+          {study && (
+            <section aria-labelledby="case-study-title" className="mt-12 border-t border-line pt-8 md:mt-14">
+              <h3 id="case-study-title" className="sr-only">
+                {t.project.caseStudy.title}
+              </h3>
+              <dl className="space-y-8">
+                <div className="grid gap-2 md:grid-cols-[9rem_1fr] md:gap-10">
+                  <dt className="text-sm text-muted">{t.project.caseStudy.problem}</dt>
+                  <dd className="max-w-2xl leading-relaxed text-fg">{pick(study.problem)}</dd>
+                </div>
+                <div className="grid gap-2 md:grid-cols-[9rem_1fr] md:gap-10">
+                  <dt className="text-sm text-muted">{t.project.caseStudy.approach}</dt>
+                  <dd>
+                    <ol className="max-w-2xl space-y-3 text-fg">
+                      {pick(study.approach).map((step, i) => (
+                        <li key={i} className="flex gap-4 leading-relaxed">
+                          <span aria-hidden="true" className="mt-px w-3 shrink-0 font-display text-xl leading-none text-accent-soft tabular-nums">
+                            {i + 1}
+                          </span>
+                          {step}
+                        </li>
+                      ))}
+                    </ol>
+                  </dd>
+                </div>
+                <div className="grid gap-2 md:grid-cols-[9rem_1fr] md:gap-10">
+                  <dt className="text-sm text-muted">{t.project.caseStudy.stack}</dt>
+                  <dd>
+                    <ul className="flex flex-wrap gap-2">
+                      {project.technologies.map((tech) => (
+                        <li key={tech} className="rounded-full border border-line px-3 py-1 text-sm text-fg">
+                          {tech}
+                        </li>
+                      ))}
+                    </ul>
+                  </dd>
+                </div>
+                <div className="grid gap-2 md:grid-cols-[9rem_1fr] md:gap-10">
+                  <dt className="text-sm text-muted">{t.project.caseStudy.result}</dt>
+                  <dd className="max-w-2xl font-display text-2xl leading-snug text-fg rtl:leading-[1.6]">{pick(study.result)}</dd>
+                </div>
+              </dl>
+            </section>
+          )}
 
           <footer className="mt-12 border-t border-line pt-5">
             <button

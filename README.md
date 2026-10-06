@@ -19,6 +19,11 @@ Scroll past the hero and the projects move through a quiet 3D space: the one in 
 
 - **3D scroll gallery:** projects are placed with CSS 3D transforms driven by scroll position (no animation or 3D library). Phones get a flatter, shallower version; *prefers-reduced-motion* gets a plain list
 - **Project lightbox:** multiple screenshots with arrows, dots, swipe and keyboard; Escape to close; the page behind is locked, keeps its scroll position and gets focus back when you close it
+- **Case studies:** each project's lightbox tells the problem, the approach, the technologies and the result, translated like everything else
+- **Interactive About:** tabs for what I'm building, what I'm experimenting with and the technologies I enjoy; pick a technology to see which projects and jobs used it (worked out from the project and CV data, so it stays true)
+- **Now:** a small dated note on what's happening at the moment
+- **Play:** a memory game matching the tools I work with. Real buttons, spoken labels, results announced to screen readers, instant flips with reduced motion, best score kept on the device
+- **Under the hood:** performance, responsive design, accessibility, three languages, Arabic RTL, the problems solved along the way, and a live readout of this visit (viewport, language and direction, theme, motion setting, first paint, load time, JavaScript size) read from the browser
 - **Per-project links:** "Live website" and "View source on GitHub" point to that project's own site and repository, and are only shown when they exist
 - **English, French and Arabic:** a language switcher in the navbar, remembered per visitor (first visits follow the browser language). Arabic is fully right to left: mirrored layout and arrows, direction-aware gallery swipes and arrow keys, and Arabic fonts (IBM Plex Sans Arabic, Amiri). Built in, with no i18n library
 - **Light / dark mode:** light by default (dark if the system prefers it), remembers the visitor's choice, no flash on load
@@ -50,6 +55,16 @@ Scroll past the hero and the projects move through a quiet 3D space: the one in 
 }
 ```
 
+Add a `caseStudy` to tell the story in the lightbox. `approach` is a list of steps:
+
+```js
+caseStudy: {
+  problem: { en: '...', fr: '...', ar: '...' },
+  approach: { en: ['Step one', 'Step two'], fr: ['...'], ar: ['...'] },
+  result: { en: '...', fr: '...', ar: '...' },
+},
+```
+
 A project with no screenshots gets a generated cover (and a "how it's put together" panel if it has `layers`).
 
 To translate a field, give it one value per language instead of a string. Anything left as a plain string is shown as-is in every language, and a missing language falls back to English:
@@ -61,6 +76,11 @@ summary: {
   ar: 'سطر واحد للبطاقة.',
 },
 ```
+
+## Keeping the site current
+
+- [`src/data/now.js`](src/data/now.js): the "Now" note (change `nowUpdated` when you edit it) and the About tabs.
+- [`src/data/craft.js`](src/data/craft.js): the "Under the hood" points and challenges.
 
 ## Translations
 
@@ -106,8 +126,10 @@ src/
 ├── App.jsx                 # Page layout
 ├── index.css               # Tailwind theme tokens (light & dark)
 ├── data/
-│   ├── projects.js         # Every project shown in the gallery
-│   └── resume.js           # Profile, experience, skills
+│   ├── projects.js         # Every project shown in the gallery, with its case study
+│   ├── resume.js           # Profile, experience, skills
+│   ├── now.js              # The Now note and the About tabs
+│   └── craft.js            # Under-the-hood points and challenges
 ├── i18n/
 │   ├── index.jsx           # Language provider and useI18n() hook
 │   └── en.js, fr.js, ar.js # Interface text per language
@@ -122,6 +144,10 @@ src/
     ├── ProjectModal.jsx    # Lightbox
     ├── ProjectGallery.jsx  # Screenshots inside the lightbox (swipe, dots, arrows)
     ├── About.jsx
+    ├── AboutTabs.jsx       # Building / Experimenting / Technologies
+    ├── Now.jsx
+    ├── Play.jsx            # The memory game
+    ├── Craft.jsx           # Under the hood, with the live readout
     ├── Contact.jsx
     ├── Footer.jsx
     ├── LanguageSwitcher.jsx # EN · FR · ع in the navbar

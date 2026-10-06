@@ -4,6 +4,9 @@ import Hero from './components/Hero'
 import ProjectShowcase from './components/ProjectShowcase'
 import Experience from './components/Experience'
 import About from './components/About'
+import Now from './components/Now'
+import Play from './components/Play'
+import Craft from './components/Craft'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
 import { profile } from './data/resume'
@@ -35,6 +38,9 @@ export default function App() {
         <ProjectShowcase />
         <Experience />
         <About />
+        <Now />
+        <Play />
+        <Craft />
         <Contact />
       </main>
       <Footer />

@@ -1,5 +1,6 @@
 import Reveal from './Reveal'
 import Section from './Section'
+import AboutTabs from './AboutTabs'
 import { education, languages, profile, toolbox } from '../data/resume'
 import { useBeirutTime } from '../lib/hooks'
 import { useI18n } from '../i18n'
@@ -29,22 +30,7 @@ export default function About() {
         <Reveal>
           <p className="font-display text-3xl leading-[1.25] text-fg md:text-4xl rtl:leading-[1.5]">{t.about.intro}</p>
 
-          <h3 className="mt-12 text-sm text-muted">{t.about.enjoy}</h3>
-          <ul className="mt-4 space-y-3 text-fg">
-            {t.about.enjoyList.map((item) => (
-              <li key={item} className="flex gap-3">
-                <span aria-hidden="true" className="mt-[0.7em] h-px w-3 shrink-0 bg-accent-soft" />
-                {item}
-              </li>
-            ))}
-          </ul>
-
-          {profile.learning?.length > 0 && (
-            <>
-              <h3 className="mt-10 text-sm text-muted">{t.about.learning}</h3>
-              <p className="mt-3 text-fg">{profile.learning.map(pick).join(t.comma)}</p>
-            </>
-          )}
+          <AboutTabs />
         </Reveal>
 
         <Reveal delay={100}>
