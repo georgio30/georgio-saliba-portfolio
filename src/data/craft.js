@@ -23,9 +23,9 @@ export const craftPoints = [
     id: 'accessibility',
     title: { en: 'Accessibility', fr: 'Accessibilité', ar: 'سهولة الوصول' },
     text: {
-      en: 'A skip link, visible focus rings and translated image descriptions. The project lightbox moves focus in, makes the page behind inert and gives focus back on close. Everything works by keyboard, and with reduced motion on, the 3D gallery becomes a plain list and the game stops animating.',
-      fr: 'Un lien d’évitement, des contours de focus visibles et des descriptions d’images traduites. La visionneuse de projet déplace le focus, rend la page derrière inerte et le restitue à la fermeture. Tout fonctionne au clavier, et avec le mouvement réduit, la galerie 3D devient une simple liste et le jeu n’anime plus.',
-      ar: 'رابط لتخطي التنقل، وحدود تركيز واضحة، ووصف مترجم للصور. تنقل نافذة المشروع التركيز إليها وتجعل الصفحة خلفها غير تفاعلية وتعيد التركيز عند الإغلاق. كل شيء يعمل بلوحة المفاتيح، ومع تقليل الحركة يتحول المعرض ثلاثي الأبعاد إلى قائمة بسيطة وتتوقف اللعبة عن الحركة.',
+      en: 'A skip link, visible focus rings and translated image descriptions. The project lightbox moves focus in, makes the page behind inert and gives focus back on close. Everything works by keyboard, and with reduced motion on, the 3D gallery becomes a plain list.',
+      fr: 'Un lien d’évitement, des contours de focus visibles et des descriptions d’images traduites. La visionneuse de projet déplace le focus, rend la page derrière inerte et le restitue à la fermeture. Tout fonctionne au clavier, et avec le mouvement réduit, la galerie 3D devient une simple liste.',
+      ar: 'رابط لتخطي التنقل، وحدود تركيز واضحة، ووصف مترجم للصور. تنقل نافذة المشروع التركيز إليها وتجعل الصفحة خلفها غير تفاعلية وتعيد التركيز عند الإغلاق. كل شيء يعمل بلوحة المفاتيح، ومع تقليل الحركة يتحول المعرض ثلاثي الأبعاد إلى قائمة بسيطة.',
     },
   },
   {
@@ -91,14 +91,14 @@ export const challenges = [
   {
     title: { en: 'A game that respects everyone', fr: 'Un jeu qui respecte tout le monde', ar: 'لعبة تحترم الجميع' },
     problem: {
-      en: 'A memory game is visual by nature, which makes it easy to build for mouse users only.',
-      fr: 'Un jeu de mémoire est visuel par nature, ce qui le rend facile à construire pour les seuls utilisateurs de souris.',
-      ar: 'لعبة الذاكرة بصرية بطبيعتها، فمن السهل بناؤها لمستخدمي الفأرة فقط.',
+      en: 'Snake is fast and visual, and it is easy to build it for one kind of player: someone with a keyboard and a mouse.',
+      fr: 'Snake est rapide et visuel, et il est facile de le construire pour un seul type de joueur\u00a0: quelqu’un avec un clavier et une souris.',
+      ar: 'لعبة الثعبان سريعة وبصرية، ومن السهل بناؤها للاعب واحد فقط: من لديه لوحة مفاتيح وفأرة.',
     },
     solution: {
-      en: 'Cards are real buttons with spoken labels, results are announced through a live region, and flips are instant when reduced motion is on. The board is a normal tab sequence, so it plays by keyboard too.',
-      fr: 'Les cartes sont de vrais boutons avec des libellés vocalisés, les résultats sont annoncés par une région live, et les retournements sont instantanés avec le mouvement réduit. Le plateau suit l’ordre de tabulation normal, on peut donc y jouer au clavier.',
-      ar: 'البطاقات أزرار حقيقية بتسميات منطوقة، وتُعلَن النتائج عبر منطقة حيّة، وتكون الحركة فورية عند تقليل الحركة. اللوحة تتبع ترتيب Tab العادي فيمكن اللعب بلوحة المفاتيح أيضًا.',
+      en: 'The board takes arrow keys, WASD, swipes and on-screen buttons, and results are announced through a live region. It pauses by itself when you scroll away or switch tabs, and it never keeps running out of sight.',
+      fr: 'Le plateau accepte les flèches, WASD, les glissements et des boutons à l’écran, et les résultats sont annoncés par une région live. Il se met en pause tout seul quand vous faites défiler ou changez d’onglet, et ne tourne jamais hors de vue.',
+      ar: 'تقبل اللوحة مفاتيح الأسهم وWASD والسحب وأزرارًا على الشاشة، وتُعلَن النتائج عبر منطقة حيّة. تتوقف مؤقتًا من تلقاء نفسها عند التمرير بعيدًا أو تبديل التبويب، ولا تستمر في العمل خارج النظر.',
     },
   },
 ]
