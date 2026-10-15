@@ -124,3 +124,112 @@ body {
     animation-duration: 0.01ms !important;
   }
 }
+
+/* Minesweeper: cells ripple open, flags drop in, bugs pop up after a loss */
+@keyframes mine-open {
+  from {
+    opacity: 0.15;
+    transform: scale(0.55);
+  }
+}
+
+@keyframes mine-flag {
+  0% {
+    opacity: 0;
+    transform: translateY(-35%) scale(0.3) rotate(-20deg);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(4%) scale(1.12) rotate(4deg);
+  }
+}
+
+@keyframes mine-bug {
+  from {
+    opacity: 0;
+    transform: scale(0) rotate(-30deg);
+  }
+  70% {
+    transform: scale(1.15);
+  }
+}
+
+@keyframes mine-hit {
+  30% {
+    transform: scale(1.35);
+  }
+}
+
+@keyframes mine-shake {
+  20% {
+    transform: translateX(-6px);
+  }
+  40% {
+    transform: translateX(5px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+}
+
+@keyframes mine-hold {
+  from {
+    transform: scale(0);
+  }
+}
+
+@keyframes mine-in {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+
+@keyframes mine-pop {
+  from {
+    transform: scale(1.25);
+    color: var(--color-accent);
+  }
+}
+
+.mine-open {
+  animation: mine-open 0.3s var(--ease-out-soft) both;
+}
+
+.mine-flag {
+  animation: mine-flag 0.32s var(--ease-out-soft) both;
+}
+
+.mine-bug {
+  animation: mine-bug 0.35s var(--ease-out-soft) both;
+}
+
+.mine-hit {
+  animation: mine-hit 0.45s ease-out;
+}
+
+.mine-shake {
+  animation: mine-shake 0.4s ease-out;
+}
+
+.mine-in {
+  animation: mine-in 0.28s var(--ease-out-soft);
+}
+
+.mine-pop {
+  animation: mine-pop 0.45s var(--ease-out-soft);
+}
+
+/* A long press fills the cell from the middle until the flag goes in */
+.mine-holding::after {
+  content: "";
+  position: absolute;
+  inset: 18%;
+  border-radius: 9999px;
+  background: var(--color-accent);
+  opacity: 0.35;
+  animation: mine-hold 350ms linear both;
+}
