@@ -17,9 +17,12 @@ Scroll past the hero and the projects move through a quiet 3D space: the one in 
 
 ## Features
 
-- **3D scroll gallery:** projects are placed with CSS 3D transforms driven by scroll position (no animation or 3D library). Phones get a flatter, shallower version; *prefers-reduced-motion* gets a plain list
-- **Project lightbox:** multiple screenshots with arrows, dots, swipe and keyboard; Escape to close; the page behind is locked, keeps its scroll position and gets focus back when you close it
-- **Case studies:** each project's lightbox tells the problem, the approach, the technologies and the result, translated like everything else
+- **3D scroll gallery:** projects are placed with CSS 3D transforms driven by scroll position (no animation or 3D library), eased toward the scroll for a smooth glide. Cards further back sit in a soft haze, the scene leans toward the mouse with a light that follows it, and each card tilts and catches a sheen on hover. Phones get a flatter, shallower version; *prefers-reduced-motion* gets a plain list
+- **Filters and progress:** filter chips by category (full-stack, mobile, front-end), plus a "built with" filter set from a case study's technology tags. A segmented progress bar shows which project is at the front, and each segment jumps to its project
+- **Case studies:** clicking a card morphs it into its case study (View Transitions, where supported). Each one has a screenshot gallery (arrows, dots, swipe, keyboard), an overview, an "at a glance" stats panel, the problem and approach, technical challenges, an architecture diagram you can step through, interactive demos and the result, with a sticky section nav. Escape closes it; the page behind is locked, keeps its scroll position and gets focus back
+- **Real numbers only:** stats come from the project data (technology and layer counts, plus checkable facts). This site's own case study adds first paint, load time and JavaScript size measured in the visitor's browser, and a PNG-vs-WebP comparison with file sizes measured live
+- **Interactive demos:** a before/after of role checks in the interface vs on the server (Saliba Polyclinic), a mini store from browsing to checkout (Iverse), loading / empty / error states (Recipe Finder), and the gallery's own placement function on a slider (this site). Each is labelled as a sketch with sample data
+- **Technology tags:** pick a technology in a case study to see which other projects use it, jump to one, or filter the gallery by it
 - **Interactive About:** tabs for what I'm building, what I'm experimenting with and the technologies I enjoy; pick a technology to see which projects and jobs used it (worked out from the project and CV data, so it stays true)
 - **Now:** a small dated note on what's happening at the moment
 - **Play:** a small Snake game where every bite is one of the tools I work with. Smooth, frame-interpolated movement on a fixed game clock, three paces (Chill wraps through walls, Classic, Challenge), timed star bites for bonus points, particles and an optional synthesised sound (no audio files), start / pause / game-over menus with instant restart, and confetti for a new personal best. Arrow keys, WASD, swipes (several turns per gesture) or on-screen buttons that react on touch-down; invalid reverse turns are ignored; a short count-in after a pause; pauses by itself when scrolled out of view or the tab is hidden; results announced to screen readers and effects dropped for *prefers-reduced-motion*; best score per pace kept on the device
@@ -57,14 +60,24 @@ Scroll past the hero and the projects move through a quiet 3D space: the one in 
 }
 ```
 
-Add a `caseStudy` to tell the story in the lightbox. `approach` is a list of steps:
+Add a `caseStudy` to tell the story. `approach` is a list of steps and `challenges` a list of `{ title, text }`:
 
 ```js
 caseStudy: {
   problem: { en: '...', fr: '...', ar: '...' },
   approach: { en: ['Step one', 'Step two'], fr: ['...'], ar: ['...'] },
+  challenges: [{ title: { en: '...' }, text: { en: '...' } }],
   result: { en: '...', fr: '...', ar: '...' },
 },
+```
+
+A few more optional fields feed the gallery and the case study:
+
+```js
+category: 'fullstack', // one of the ids in `categories`, for the filter chips
+facts: [{ value: '3', label: { en: 'core records' } }], // real, checkable numbers only
+layers: [{ name: 'API', items: ['Node.js', 'Express'] }], // the architecture diagram
+demos: ['access'], // interactive demos, see src/components/ProjectDemos.jsx
 ```
 
 A project with no screenshots gets a generated cover (and a "how it's put together" panel if it has `layers`).
@@ -136,7 +149,7 @@ src/
 ├── i18n/
 │   ├── index.jsx           # Language provider and useI18n() hook
 │   └── en.js, fr.js, ar.js # Interface text per language
-├── lib/                    # Shared hooks and gallery helper
+├── lib/                    # Shared hooks, gallery helper and the 3D stage maths
 └── components/
     ├── Navbar.jsx          # Sticky nav, active section, scroll progress
     ├── Hero.jsx

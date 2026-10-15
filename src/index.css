@@ -233,3 +233,85 @@ body {
   opacity: 0.35;
   animation: mine-hold 350ms linear both;
 }
+
+/* Selected work: the light on a card, a new filter settling in, and the card-to-case-study morph */
+/* No blend mode here: blending inside the 3D scene can stop Chrome from painting it */
+.card-sheen {
+  background: radial-gradient(circle at var(--lx, 50%) var(--ly, 30%), rgb(255 255 255 / 0.28), transparent 55%);
+}
+
+:root.dark .card-sheen {
+  background: radial-gradient(circle at var(--lx, 50%) var(--ly, 30%), rgb(255 255 255 / 0.12), transparent 55%);
+}
+
+/* On phones the filter chips can scroll sideways; fade the far edge so that reads as "more" */
+@media (max-width: 639px) {
+  .chip-row {
+    mask-image: linear-gradient(to right, #000 calc(100% - 1.5rem), transparent);
+  }
+
+  [dir="rtl"] .chip-row {
+    mask-image: linear-gradient(to left, #000 calc(100% - 1.5rem), transparent);
+  }
+}
+
+@keyframes work-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 24px, -160px);
+  }
+}
+
+.work-scene {
+  animation: work-in 0.7s var(--ease-out-soft);
+}
+
+::view-transition-group(project-visual) {
+  animation-duration: 0.62s;
+  animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+::view-transition-old(project-visual),
+::view-transition-new(project-visual) {
+  /* The card and the gallery have different shapes; fill the frame instead of squashing */
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.4s;
+}
+
+/* Case study: the request dot travelling between layers, and a stat settling in */
+@keyframes layer-ping {
+  from {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-accent) 35%, transparent);
+  }
+  to {
+    box-shadow: 0 0 0 10px transparent;
+  }
+}
+
+.layer-ping {
+  animation: layer-ping 0.7s ease-out;
+}
+
+@keyframes layer-down {
+  from {
+    top: 0;
+  }
+  to {
+    top: calc(100% - 0.5rem);
+  }
+}
+
+@keyframes layer-up {
+  from {
+    bottom: 0;
+  }
+  to {
+    bottom: calc(100% - 0.5rem);
+  }
+}

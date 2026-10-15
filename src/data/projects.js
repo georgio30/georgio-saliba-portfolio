@@ -18,9 +18,24 @@
       (the card is portrait there, so a phone screenshot fits best).
     - note (optional): a small personal label next to the title.
     - tone: background colour of the generated cover.
-    - caseStudy (optional): { problem, approach: [steps], result }, shown in the
-      project lightbox. Each is text or { en, fr, ar }; approach is a list.
+    - caseStudy (optional): { problem, approach: [steps], challenges, result },
+      shown in the project's case study. Each is text or { en, fr, ar };
+      approach is a list, challenges a list of { title, text }.
+    - category: one of the ids in `categories` below, used by the filter.
+    - facts (optional): { value, label } pairs for the stats panel. Only real,
+      checkable numbers; technology and layer counts are added automatically.
+    - measured (optional): true shows numbers read live from the visitor's
+      browser (only makes sense for this site itself).
+    - demos (optional): interactive demos shown in the case study, by id
+      (see src/components/ProjectDemos.jsx).
 */
+
+// Filter chips above the gallery, in this order
+export const categories = [
+  { id: 'fullstack', label: { en: 'Full-stack', fr: 'Full-stack', ar: 'متكامل' } },
+  { id: 'mobile', label: { en: 'Mobile', fr: 'Mobile', ar: 'جوّال' } },
+  { id: 'frontend', label: { en: 'Front-end', fr: 'Front-end', ar: 'واجهات أمامية' } },
+]
 
 // Layer names and items shared by several projects
 const layer = {
@@ -64,7 +79,53 @@ export const projects = [
     live: null,
     note: { en: 'Most recent build', fr: 'Le plus récent', ar: 'الأحدث' },
     tone: '#ebe7dc',
+    category: 'fullstack',
+    facts: [
+      {
+        value: '3',
+        label: {
+          en: 'core records: patients, doctors and appointments',
+          fr: 'types de fiches : patients, médecins et rendez-vous',
+          ar: 'سجلات أساسية: المرضى والأطباء والمواعيد',
+        },
+      },
+      {
+        value: 'RBAC',
+        label: {
+          en: 'roles checked by the server on every API route',
+          fr: 'rôles vérifiés par le serveur sur chaque route de l’API',
+          ar: 'أدوار يتحقق منها الخادم في كل مسار من الواجهة البرمجية',
+        },
+      },
+    ],
+    demos: ['access'],
     caseStudy: {
+      challenges: [
+        {
+          title: {
+            en: 'Access the interface can’t be talked out of',
+            fr: 'Un accès que l’interface ne peut pas contourner',
+            ar: 'صلاحيات لا يمكن للواجهة تجاوزها',
+          },
+          text: {
+            en: 'Hiding a button doesn’t stop anyone from calling the API directly. Each Express route checks the JWT and the role itself, so a request without the right role is refused before it reaches the database.',
+            fr: 'Masquer un bouton n’empêche personne d’appeler l’API directement. Chaque route Express vérifie elle-même le JWT et le rôle : une requête sans le bon rôle est refusée avant d’atteindre la base de données.',
+            ar: 'إخفاء زر لا يمنع أحدًا من استدعاء الواجهة البرمجية مباشرةً. يتحقق كل مسار Express بنفسه من JWT ومن الدور، فتُرفض الطلبات التي لا تحمل الدور الصحيح قبل أن تصل إلى قاعدة البيانات.',
+          },
+        },
+        {
+          title: {
+            en: 'Records that depend on each other',
+            fr: 'Des fiches qui dépendent les unes des autres',
+            ar: 'سجلات يعتمد بعضها على بعض',
+          },
+          text: {
+            en: 'An appointment only means something with a patient and a doctor attached. Designing the schema before the screens kept those links in the database, instead of leaving the interface to hold them together.',
+            fr: 'Un rendez-vous n’a de sens qu’avec un patient et un médecin. Concevoir le schéma avant les écrans a gardé ces liens dans la base de données, au lieu de laisser l’interface les tenir ensemble.',
+            ar: 'لا معنى للموعد من دون مريض وطبيب مرتبطين به. تصميم المخطط قبل الشاشات أبقى هذه الروابط في قاعدة البيانات بدل أن تتولّاها الواجهة.',
+          },
+        },
+      ],
       problem: {
         en: 'A clinic has to keep patients, doctors and appointments in one place, and each person should only ever see what their role allows.',
         fr: 'Une clinique doit garder patients, médecins et rendez-vous au même endroit, et chacun ne doit voir que ce que son rôle permet.',
@@ -122,7 +183,53 @@ export const projects = [
     github: null,
     live: null,
     tone: '#f1e2d9',
+    category: 'fullstack',
+    facts: [
+      {
+        value: '3',
+        label: {
+          en: 'steps in one flow: browse, cart, checkout',
+          fr: 'étapes d’un même parcours : catalogue, panier, paiement',
+          ar: 'خطوات في مسار واحد: التصفّح والسلة والدفع',
+        },
+      },
+      {
+        value: '1',
+        label: {
+          en: 'account behind every cart and order',
+          fr: 'compte derrière chaque panier et chaque commande',
+          ar: 'حساب واحد خلف كل سلة وكل طلب',
+        },
+      },
+    ],
+    demos: ['checkout'],
     caseStudy: {
+      challenges: [
+        {
+          title: {
+            en: 'A cart that belongs to someone',
+            fr: 'Un panier qui appartient à quelqu’un',
+            ar: 'سلة تنتمي إلى شخص',
+          },
+          text: {
+            en: 'Browsing can be anonymous, but an order can’t. Tying carts and orders to the signed-in user is what turns three separate pages into one shopping flow.',
+            fr: 'On peut parcourir le catalogue de façon anonyme, mais pas commander. Lier paniers et commandes à l’utilisateur connecté transforme trois pages distinctes en un seul parcours d’achat.',
+            ar: 'يمكن التصفّح دون حساب، أما الطلب فلا. ربط السلات والطلبات بالمستخدم المسجّل هو ما يحوّل ثلاث صفحات منفصلة إلى مسار شراء واحد.',
+          },
+        },
+        {
+          title: {
+            en: 'One set of components for every screen',
+            fr: 'Les mêmes composants pour tous les écrans',
+            ar: 'مكوّنات واحدة لكل الشاشات',
+          },
+          text: {
+            en: 'Product lists, the cart and checkout all had to work from phone to desktop. Tailwind’s responsive utilities let the same components rearrange themselves instead of keeping separate mobile versions.',
+            fr: 'Listes de produits, panier et paiement devaient fonctionner du téléphone à l’ordinateur. Les utilitaires responsives de Tailwind permettent aux mêmes composants de se réorganiser, sans versions mobiles séparées.',
+            ar: 'كان على قوائم المنتجات والسلة والدفع أن تعمل من الهاتف إلى الحاسوب. سمحت أدوات Tailwind المتجاوبة للمكوّنات نفسها بإعادة ترتيب نفسها بدل الاحتفاظ بنسخ منفصلة للهاتف.',
+          },
+        },
+      ],
       problem: {
         en: 'An online store only works if browsing, the cart and checkout feel like one continuous flow tied to a signed-in user.',
         fr: 'Une boutique en ligne ne fonctionne que si la navigation, le panier et le paiement forment un seul parcours continu, lié à un utilisateur connecté.',
@@ -184,7 +291,45 @@ export const projects = [
     live: null,
     note: { en: 'The mobile one', fr: 'La version mobile', ar: 'تطبيق الجوّال' },
     tone: '#e4e6dc',
+    category: 'mobile',
+    facts: [
+      {
+        value: '2',
+        label: { en: 'platforms: iOS and Android', fr: 'plateformes : iOS et Android', ar: 'منصّتان: iOS وAndroid' },
+      },
+      {
+        value: '1',
+        label: { en: 'shared codebase', fr: 'base de code commune', ar: 'قاعدة شيفرة مشتركة' },
+      },
+    ],
+    demos: ['recipes'],
     caseStudy: {
+      challenges: [
+        {
+          title: {
+            en: 'Waiting on someone else’s API',
+            fr: 'Dépendre de l’API d’un autre',
+            ar: 'الاعتماد على واجهة برمجية لطرف آخر',
+          },
+          text: {
+            en: 'Recipes come from Spoonacular over the network, so every screen needs an answer for “still loading” and “nothing found”, not just for the happy path with results.',
+            fr: 'Les recettes arrivent de Spoonacular par le réseau : chaque écran doit donc prévoir « en cours de chargement » et « aucun résultat », pas seulement le cas idéal.',
+            ar: 'تصل الوصفات من Spoonacular عبر الشبكة، لذا تحتاج كل شاشة إلى حالة «جارٍ التحميل» وحالة «لا نتائج»، لا إلى حالة النتائج وحدها.',
+          },
+        },
+        {
+          title: {
+            en: 'Two platforms, one codebase',
+            fr: 'Deux plateformes, une base de code',
+            ar: 'منصّتان وقاعدة شيفرة واحدة',
+          },
+          text: {
+            en: 'Writing the app twice would double every fix. React Native kept a single codebase for iOS and Android, and Firebase handled sign-in on both without a server of my own.',
+            fr: 'Écrire l’appli deux fois doublerait chaque correction. React Native a gardé une seule base de code pour iOS et Android, et Firebase a géré la connexion sur les deux sans serveur à moi.',
+            ar: 'كتابة التطبيق مرتين تعني مضاعفة كل إصلاح. أبقى React Native قاعدة شيفرة واحدة لـ iOS وAndroid، وتولّى Firebase تسجيل الدخول على المنصتين دون خادم خاص بي.',
+          },
+        },
+      ],
       problem: {
         en: 'Deciding what to cook is easier when recipes are in your pocket, on whichever phone you own.',
         fr: 'Choisir quoi cuisiner est plus simple quand les recettes sont dans la poche, quel que soit le téléphone.',
@@ -230,6 +375,20 @@ export const projects = [
       ar: 'موقع شخصي من صفحة واحدة مبني بـ React وVite وTailwind CSS. يعتمد معرض المشاريع ثلاثي الأبعاد على تحويلات CSS يقودها موضع التمرير، مع نسخة أخفّ للهواتف ونسخة ثابتة لمن يفضّلون تقليل الحركة.',
     },
     technologies: ['React', 'Vite', 'Tailwind CSS', 'CSS 3D transforms'],
+    layers: [
+      { name: layer.interface, items: ['React', 'Tailwind CSS', 'CSS 3D transforms'] },
+      {
+        name: { en: 'Content', fr: 'Contenu', ar: 'المحتوى' },
+        items: [
+          { en: 'Project data', fr: 'Données des projets', ar: 'بيانات المشاريع' },
+          { en: 'EN · FR · AR dictionaries', fr: 'Dictionnaires EN · FR · AR', ar: 'قواميس EN · FR · AR' },
+        ],
+      },
+      {
+        name: { en: 'Build', fr: 'Build', ar: 'البناء' },
+        items: ['Vite', { en: 'WebP images', fr: 'Images WebP', ar: 'صور WebP' }],
+      },
+    ],
     screenshots: [
       {
         name: 'portfolio-hero',
@@ -260,7 +419,55 @@ export const projects = [
     github: 'https://github.com/georgio30/georgio-saliba-portfolio',
     live: 'https://georgio-saliba-portfolio.vercel.app',
     tone: '#efede7',
+    category: 'frontend',
+    facts: [
+      {
+        value: '3',
+        label: {
+          en: 'languages, with a true right-to-left Arabic',
+          fr: 'langues, dont un arabe vraiment de droite à gauche',
+          ar: 'لغات، منها عربية حقيقية من اليمين إلى اليسار',
+        },
+      },
+      {
+        value: '0',
+        label: {
+          en: 'animation, 3D or translation libraries',
+          fr: 'bibliothèque d’animation, de 3D ou de traduction',
+          ar: 'مكتبات رسوم متحركة أو ثلاثية الأبعاد أو ترجمة',
+        },
+      },
+    ],
+    // Read live from the visitor's browser in the case study
+    measured: true,
+    demos: ['depth', 'images'],
     caseStudy: {
+      challenges: [
+        {
+          title: {
+            en: 'Scroll-linked 3D without re-rendering',
+            fr: 'De la 3D liée au défilement, sans re-rendu',
+            ar: 'أبعاد ثلاثية مرتبطة بالتمرير دون إعادة عرض',
+          },
+          text: {
+            en: 'Each card’s place is computed from the scroll offset and written straight to its CSS transform inside requestAnimationFrame, eased toward the target for a smoother glide. React never re-renders while you scroll.',
+            fr: 'La place de chaque carte est calculée à partir du défilement et écrite directement dans sa transformation CSS dans requestAnimationFrame, adoucie vers sa cible pour un mouvement plus fluide. React ne refait aucun rendu pendant le défilement.',
+            ar: 'يُحسب موضع كل بطاقة من مقدار التمرير ويُكتب مباشرةً في تحويل CSS الخاص بها داخل requestAnimationFrame، مع تليين نحو الهدف لحركة أنعم. لا يعيد React العرض أثناء التمرير.',
+          },
+        },
+        {
+          title: {
+            en: 'Right to left beyond the layout',
+            fr: 'De droite à gauche, au-delà de la mise en page',
+            ar: 'من اليمين إلى اليسار أبعد من التخطيط',
+          },
+          text: {
+            en: 'Mirroring the page is the easy part. Swipes, arrow keys, progress bars and arrows all read the direction from one place, so Arabic feels native rather than flipped.',
+            fr: 'Inverser la page est la partie facile. Balayages, flèches du clavier, barres de progression et flèches lisent tous la direction au même endroit, pour que l’arabe paraisse natif et non retourné.',
+            ar: 'قلب الصفحة هو الجزء السهل. تقرأ إيماءات السحب وأسهم لوحة المفاتيح وأشرطة التقدّم والأسهم الاتجاه من مكان واحد، فتبدو العربية أصيلة لا مقلوبة.',
+          },
+        },
+      ],
       problem: {
         en: 'A developer portfolio is easy to scroll past. I wanted something memorable, without animation libraries slowing it down or shutting out visitors who use a keyboard, a phone or Arabic.',
         fr: 'Un portfolio de développeur se survole facilement. Je voulais quelque chose de mémorable, sans bibliothèque d’animation qui le ralentisse ni visiteurs laissés de côté, qu’ils utilisent le clavier, un téléphone ou l’arabe.',

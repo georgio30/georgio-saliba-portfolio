@@ -2,39 +2,8 @@ import { useEffect, useState } from 'react'
 import Reveal from './Reveal'
 import Section from './Section'
 import { challenges, craftPoints } from '../data/craft'
-import { useReducedMotion, useTheme } from '../lib/hooks'
+import { usePageStats, useReducedMotion, useTheme } from '../lib/hooks'
 import { useI18n } from '../i18n'
-
-// Real numbers from this visit, read from the browser's own timing data
-function usePageStats() {
-  const [stats, setStats] = useState(null)
-
-  useEffect(() => {
-    const read = () => {
-      const nav = performance.getEntriesByType('navigation')[0]
-      const paint = performance.getEntriesByType('paint').find((e) => e.name === 'first-contentful-paint')
-      const scripts = performance
-        .getEntriesByType('resource')
-        .filter((r) => r.name.startsWith(location.origin) && r.name.split('?')[0].endsWith('.js'))
-      const bytes = scripts.reduce((sum, r) => sum + r.encodedBodySize, 0)
-      setStats({
-        paint: paint ? Math.round(paint.startTime) : null,
-        load: nav?.loadEventEnd > 0 ? Math.round(nav.loadEventEnd) : null,
-        // Compressed size of the scripts, the same whether or not they came from the cache
-        scriptKb: bytes > 0 ? Math.round(bytes / 1024) : null,
-      })
-    }
-    if (document.readyState === 'complete') {
-      read()
-      return
-    }
-    const onLoad = () => setTimeout(read, 0)
-    window.addEventListener('load', onLoad, { once: true })
-    return () => window.removeEventListener('load', onLoad)
-  }, [])
-
-  return stats
-}
 
 function useViewportWidth() {
   const [width, setWidth] = useState(() => window.innerWidth)
