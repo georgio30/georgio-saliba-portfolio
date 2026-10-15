@@ -22,7 +22,7 @@ Scroll past the hero and the projects move through a quiet 3D space: the one in 
 - **Case studies:** each project's lightbox tells the problem, the approach, the technologies and the result, translated like everything else
 - **Interactive About:** tabs for what I'm building, what I'm experimenting with and the technologies I enjoy; pick a technology to see which projects and jobs used it (worked out from the project and CV data, so it stays true)
 - **Now:** a small dated note on what's happening at the moment
-- **Play:** a small Snake game where every bite is one of the tools I work with. Arrow keys, WASD, swipes or on-screen buttons; pauses by itself when scrolled out of view; results announced to screen readers; best score kept on the device
+- **Play:** a small Snake game where every bite is one of the tools I work with. Smooth, frame-interpolated movement on a fixed game clock, three paces (Chill wraps through walls, Classic, Challenge), timed star bites for bonus points, particles and an optional synthesised sound (no audio files), start / pause / game-over menus with instant restart, and confetti for a new personal best. Arrow keys, WASD, swipes (several turns per gesture) or on-screen buttons that react on touch-down; invalid reverse turns are ignored; a short count-in after a pause; pauses by itself when scrolled out of view or the tab is hidden; results announced to screen readers and effects dropped for *prefers-reduced-motion*; best score per pace kept on the device
 - **Ask about me:** a small floating chat with five ready-written questions and answers about Georgio (no AI and no API key), each with a button to the right section. Keyboard accessible, answers announced to screen readers, follows the language switch
 - **Under the hood:** performance, responsive design, accessibility, three languages, Arabic RTL, the problems solved along the way, and a live readout of this visit (viewport, language and direction, theme, motion setting, first paint, load time, JavaScript size) read from the browser
 - **Per-project links:** "Live website" and "View source on GitHub" point to that project's own site and repository, and are only shown when they exist
@@ -148,7 +148,8 @@ src/
     ├── About.jsx
     ├── AboutTabs.jsx       # Building / Experimenting / Technologies
     ├── Now.jsx
-    ├── Play.jsx            # The Snake game
+    ├── Play.jsx            # Game switcher (Snake, Minesweeper)
+    ├── Snake.jsx           # Snake: menus, controls, React wiring (engine and drawing in lib/snake.js)
     ├── Craft.jsx           # Under the hood, with the live readout
     ├── Chat.jsx            # The floating "ask about me" chat
     ├── Contact.jsx
