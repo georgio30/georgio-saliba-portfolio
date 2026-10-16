@@ -28,6 +28,8 @@ export default {
     note: ['المخطط ← API ← الواجهة،', 'كلّها من الألف إلى الياء.'],
     intro: 'واجهات React وTypeScript فوق واجهات برمجية Node.js وقواعد بيانات MySQL. مرّر للأسفل لتتصفّح بعضًا منها.',
     explore: 'تصفّح الأعمال',
+    open: 'منفتح على وظائف Full-Stack',
+    start: 'ابدأ بمشروع',
     introWorld: 'واجهات React وTypeScript فوق واجهات برمجية Node.js وقواعد بيانات MySQL. طِر بين الجزر لتزور بعضها، أو مرّر للأسفل للقائمة الكاملة.',
   },
   world: {
