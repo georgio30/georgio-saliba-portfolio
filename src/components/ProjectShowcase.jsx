@@ -1,25 +1,16 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
-import ProjectCard from './ProjectCard'
+import ProjectCard, { ProjectVisual } from './ProjectCard'
 import ProjectModal from './ProjectModal'
+import Reveal from './Reveal'
+import Words from './Words'
 import { categories, projects } from '../data/projects'
 import { useMediaQuery, useReducedMotion } from '../lib/hooks'
-import { clamp, ease, pad, place } from '../lib/stage'
+import { clamp, ease, pad } from '../lib/motion'
 import { useI18n } from '../i18n'
 
-// Scroll length per project and the pause before the first / after the last, in screen heights
-const STEP = 0.9
-const DWELL = 0.35
-// The card image and the case study's gallery share this name, so the browser morphs one into the other
+// The preview's image and the case study's gallery share this name, so the browser morphs one into the other
 const MORPH = 'project-visual'
-const GLOW =
-  'radial-gradient(42rem 30rem at var(--gx, 50%) var(--gy, 42%), color-mix(in oklab, var(--color-accent-soft) 13%, transparent), transparent 70%)'
-
-function sectionScroll(section) {
-  const range = section.offsetHeight - window.innerHeight
-  const top = section.getBoundingClientRect().top + window.scrollY
-  return { range, top }
-}
 
 // 'all', 'category:<id>' or 'tech:<name>'
 function matches(project, filter) {
@@ -29,12 +20,14 @@ function matches(project, filter) {
   return true
 }
 
+const number = (project) => pad(projects.indexOf(project) + 1)
+
 function Filters({ filter, onChange, count }) {
   const { t, pick } = useI18n()
   const tech = filter.startsWith('tech:') ? filter.slice(5) : null
   const chip = (active) =>
     `inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors duration-200 sm:px-3 sm:text-sm ${
-      active ? 'border-fg bg-fg text-ink' : 'border-line bg-ink/70 text-muted backdrop-blur-sm hover:border-fg/30 hover:text-fg'
+      active ? 'border-fg bg-fg text-ink' : 'border-line text-muted hover:border-fg/30 hover:text-fg'
     }`
   const options = [
     { id: 'all', label: t.work.all, n: projects.length },
@@ -74,165 +67,121 @@ function Filters({ filter, onChange, count }) {
   )
 }
 
-export default function ProjectShowcase() {
+// One line of the list: number, title, what it is, the stack and the year
+function ProjectRow({ project, onOpen, onEnter }) {
   const { t, pick } = useI18n()
+  const title = pick(project.title)
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      onPointerEnter={(e) => e.pointerType === 'mouse' && onEnter(e)}
+      onFocus={(e) => e.currentTarget.matches(':focus-visible') && onEnter(e)}
+      aria-label={t.work.openProject(number(project), title)}
+      className="work-row group grid w-full grid-cols-[2.5rem_1fr_auto] items-baseline gap-x-6 border-t border-line py-7 text-start transition-opacity duration-500 lg:grid-cols-[3rem_1fr_15rem_4rem_2rem] lg:py-9"
+    >
+      <span className="text-sm tabular-nums text-muted" dir="ltr">
+        {number(project)}
+      </span>
+      <span className="min-w-0">
+        <span className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
+          <span className="font-display text-4xl leading-[1.05] text-fg transition-[translate,color] duration-500 ease-out group-hover:translate-x-2 group-hover:text-accent group-focus-visible:text-accent lg:text-6xl rtl:group-hover:-translate-x-2">
+            {title}
+          </span>
+          {project.note && <span className="rounded-full border border-line px-2.5 py-0.5 text-xs text-muted">{pick(project.note)}</span>}
+        </span>
+        <span className="mt-3 block max-w-xl text-sm leading-relaxed text-muted">{pick(project.summary)}</span>
+      </span>
+      <span className="hidden text-sm leading-relaxed text-muted lg:block">{project.technologies.slice(0, 4).join(' · ')}</span>
+      <span className="hidden text-sm tabular-nums text-muted lg:block" dir="ltr">
+        {project.year}
+      </span>
+      <span
+        aria-hidden="true"
+        className="self-center text-xl text-muted transition-[translate,color] duration-300 ease-out group-hover:translate-x-1 group-hover:text-accent rtl:-scale-x-100 rtl:group-hover:-translate-x-1"
+      >
+        →
+      </span>
+    </button>
+  )
+}
+
+export default function ProjectShowcase() {
+  const { t } = useI18n()
   const reduced = useReducedMotion()
-  const compact = !useMediaQuery('(min-width: 768px)')
-  const finePointer = useMediaQuery('(pointer: fine)')
+  // The list with a floating preview needs a mouse and some width; phones and tablets get cards
+  const list = useMediaQuery('(min-width: 768px) and (hover: hover) and (pointer: fine)')
   const [filter, setFilter] = useState('all')
   const [open, setOpen] = useState(null)
+  const [hovered, setHovered] = useState(null)
 
   const visible = useMemo(() => projects.filter((p) => matches(p, filter)), [filter])
-  const last = visible.length - 1
-  const total = last * STEP + 2 * DWELL
 
-  const sectionRef = useRef(null)
-  const stageRef = useRef(null)
-  const sceneRef = useRef(null)
-  const cardRefs = useRef([])
-  const segmentRefs = useRef([])
-  const counterRef = useRef(null)
-  const hintRef = useRef(null)
-  // Where the gallery has eased to, and where the pointer is (-0.5..0.5), kept across renders
-  const motion = useRef({ p: null, mx: 0, my: 0, tx: 0, ty: 0, active: -1 })
+  const listRef = useRef(null)
+  const previewRef = useRef(null)
+  const cardRefs = useRef({})
+  // Where the preview has eased to, and where it's heading
+  const motion = useRef({ x: 0, y: 0, tx: 0, ty: 0, tilt: 0, frame: 0, then: 0, placed: false })
 
-  useEffect(() => {
-    if (reduced) return
+  // The preview trails the pointer, leaning a little into the direction it moves
+  const follow = (x, y) => {
     const m = motion.current
-    m.p = null
-    m.active = -1
-    let frame = 0
-    let then = 0
-
-    const update = (now) => {
-      frame = 0
-      const dt = then ? Math.min(now - then, 64) : 16
-      then = now
-      const section = sectionRef.current
-      const { range } = sectionScroll(section)
-      const u = clamp(-section.getBoundingClientRect().top / range, 0, 1) * total
-      const target = clamp((u - DWELL) / STEP, 0, last)
-
-      // Glide toward the scroll position instead of jumping to it, for a calmer, filmic move
-      m.p = m.p === null ? target : m.p + (target - m.p) * ease(dt, 110)
-      if (Math.abs(target - m.p) < 0.0008) m.p = target
-      m.mx += (m.tx - m.mx) * ease(dt, 160)
-      m.my += (m.ty - m.my) * ease(dt, 160)
-      const p = m.p
-
-      cardRefs.current.forEach((el, i) => {
-        if (!el) return
-        const d = i - p
-        const { z, transform, opacity, shade } = place(d, i % 2 ? 1 : -1, compact)
-        el.style.transform = transform
-        el.style.opacity = opacity
-        // Nearer cards on top, even where the browser doesn't depth-sort 3D layers
-        el.style.zIndex = String(Math.round(2000 + z))
-        // Only the card at the front shows its title underneath
-        el.style.setProperty('--meta', clamp(1 - Math.abs(d) * 3, 0, 1))
-        el.style.setProperty('--shade', shade)
-        el.style.pointerEvents = Math.abs(d) < 0.3 ? 'auto' : 'none'
-      })
-
-      // The whole scene leans a little toward the pointer, and the light follows it
-      sceneRef.current.style.transform = `rotateX(${(-m.my * 3).toFixed(3)}deg) rotateY(${(m.mx * 4).toFixed(3)}deg)`
-      stageRef.current.style.setProperty('--gx', `${(50 + m.mx * 40).toFixed(2)}%`)
-      stageRef.current.style.setProperty('--gy', `${(42 + m.my * 30).toFixed(2)}%`)
-
-      const active = Math.round(p)
-      segmentRefs.current.forEach((el, i) => {
-        if (!el) return
-        el.style.setProperty('--fill', clamp(p - i + 1, 0, 1))
-        if (active !== m.active) {
-          el.dataset.active = String(i === active)
-          if (i === active) el.setAttribute('aria-current', 'step')
-          else el.removeAttribute('aria-current')
-        }
-      })
-      if (active !== m.active) {
-        m.active = active
-        counterRef.current.textContent = pad(active + 1)
-      }
-      hintRef.current.style.opacity = p < 0.15 && last > 0 ? 1 : 0
-
-      const settled = m.p === target && Math.abs(m.tx - m.mx) < 0.001 && Math.abs(m.ty - m.my) < 0.001
-      if (!settled) frame = requestAnimationFrame(update)
-      else then = 0
+    const rect = listRef.current.getBoundingClientRect()
+    m.tx = x - rect.left
+    m.ty = y - rect.top
+    if (!m.placed || reduced) {
+      m.x = m.tx
+      m.y = m.ty
+      m.placed = true
     }
-
-    const schedule = () => {
-      if (!frame) frame = requestAnimationFrame(update)
+    const step = (now) => {
+      m.frame = 0
+      const dt = m.then ? Math.min(now - m.then, 64) : 16
+      m.then = now
+      const k = reduced ? 1 : ease(dt, 90)
+      const dx = (m.tx - m.x) * k
+      m.x += dx
+      m.y += (m.ty - m.y) * k
+      m.tilt += (clamp(dx * 0.35, -7, 7) - m.tilt) * (reduced ? 1 : ease(dt, 120))
+      const el = previewRef.current
+      if (el) el.style.transform = `translate(${m.x.toFixed(1)}px, ${m.y.toFixed(1)}px) translate(-50%, -50%) rotate(${m.tilt.toFixed(2)}deg)`
+      const settled = Math.abs(m.tx - m.x) < 0.3 && Math.abs(m.ty - m.y) < 0.3 && Math.abs(m.tilt) < 0.05
+      if (settled) m.then = 0
+      else m.frame = requestAnimationFrame(step)
     }
-    const onPointer = (e) => {
-      if (e.pointerType !== 'mouse') return
-      m.tx = e.clientX / window.innerWidth - 0.5
-      m.ty = e.clientY / window.innerHeight - 0.5
-      schedule()
-    }
-    const onLeave = () => {
-      m.tx = m.ty = 0
-      schedule()
-    }
-
-    const stage = stageRef.current
-    update(performance.now())
-    window.addEventListener('scroll', schedule, { passive: true })
-    window.addEventListener('resize', schedule)
-    if (finePointer && !compact) {
-      stage.addEventListener('pointermove', onPointer)
-      stage.addEventListener('pointerleave', onLeave)
-    }
-    return () => {
-      cancelAnimationFrame(frame)
-      window.removeEventListener('scroll', schedule)
-      window.removeEventListener('resize', schedule)
-      stage.removeEventListener('pointermove', onPointer)
-      stage.removeEventListener('pointerleave', onLeave)
-    }
-  }, [reduced, compact, finePointer, last, total])
-
-  const scrollToProject = useCallback(
-    (i, behavior = 'smooth') => {
-      const { range, top } = sectionScroll(sectionRef.current)
-      window.scrollTo({ top: top + ((DWELL + i * STEP) / total) * range, behavior })
-    },
-    [total],
-  )
-
-  // A new filter starts the gallery over at its first project
-  const filtered = useRef(false)
-  useLayoutEffect(() => {
-    if (!filtered.current) return
-    filtered.current = false
-    const rect = sectionRef.current.getBoundingClientRect()
-    if (reduced) {
-      if (rect.top < 0) sectionRef.current.scrollIntoView({ behavior: 'instant' })
-    } else if (rect.top <= 1) scrollToProject(0, 'instant')
-  }, [visible, reduced, scrollToProject])
-
-  const changeFilter = (next) => {
-    filtered.current = true
-    setFilter(next)
+    if (!m.frame) m.frame = requestAnimationFrame(step)
   }
 
-  // Tabbing to a card that's still in the distance brings it to the front
-  const bringForward = (i) => (e) => {
-    if (reduced || !e.currentTarget.matches(':focus-visible')) return
-    scrollToProject(i)
+  useEffect(() => () => cancelAnimationFrame(motion.current.frame), [])
+
+  const onListMove = (e) => {
+    if (e.pointerType === 'mouse') follow(e.clientX, e.clientY)
+  }
+  const onListLeave = () => {
+    setHovered(null)
+    motion.current.placed = false
+  }
+  // Keyboard focus puts the preview beside the row instead of under a pointer
+  const onRowEnter = (slug) => (e) => {
+    setHovered(slug)
+    if (e.type === 'focus') {
+      const r = e.currentTarget.getBoundingClientRect()
+      motion.current.placed = false
+      follow(document.dir === 'rtl' ? r.left + r.width * 0.3 : r.left + r.width * 0.7, r.top + r.height / 2)
+    }
   }
 
-  // The image of the card at the front, if `slug` is that card
-  const frontVisual = (slug) => {
-    const i = visible.findIndex((p) => p.slug === slug)
-    if (i < 0 || (!reduced && Math.abs(i - (motion.current.p ?? 0)) > 0.5)) return null
-    return cardRefs.current[i]?.querySelector('[data-visual]') ?? null
+  // The element the case study morphs from: the preview on desktop, the card's image on phones
+  const visualFor = (slug) => {
+    if (list) return hovered === slug ? (previewRef.current?.querySelector(`[data-slug="${slug}"]`) ?? null) : null
+    return cardRefs.current[slug]?.querySelector('[data-visual]') ?? null
   }
 
   const canMorph = () => !reduced && typeof document.startViewTransition === 'function'
 
-  // Opening: the card's image grows into the case study's gallery
+  // Opening: the image grows into the case study's gallery
   const openProject = (slug) => {
-    const visual = frontVisual(slug)
+    const visual = visualFor(slug)
     if (!canMorph() || !visual) return setOpen(slug)
     visual.style.viewTransitionName = MORPH
     const transition = document.startViewTransition(() => {
@@ -243,10 +192,10 @@ export default function ProjectShowcase() {
     transition.ready.catch(() => {})
   }
 
-  // Closing: shrinks back into the card when it's still the one at the front.
-  // Returns false to let the case study fade out by itself instead.
+  // Closing: shrinks back into its card on phones. On desktop the pointer has usually moved on,
+  // so the case study fades out by itself (returning false says so)
   const morphClose = () => {
-    const visual = frontVisual(open)
+    const visual = list ? null : visualFor(open)
     if (!canMorph() || !visual) return false
     const transition = document.startViewTransition(() => {
       flushSync(() => setOpen(null))
@@ -269,128 +218,78 @@ export default function ProjectShowcase() {
 
   // From a technology tag in a case study: close it and show every project that uses it
   const filterByTech = (tech) => {
-    // Synchronously, so the case study has put the page's scroll back before the filter moves it
+    // Synchronously, so the case study has put the page's scroll back before the list is scrolled to
     flushSync(() => setOpen(null))
-    changeFilter(`tech:${tech}`)
-  }
-
-  const modal = open !== null && (
-    <ProjectModal
-      projects={visible}
-      slug={open}
-      onSelect={setOpen}
-      onClose={() => setOpen(null)}
-      morphClose={morphClose}
-      morph={canMorph()}
-      onFilterTech={filterByTech}
-    />
-  )
-
-  if (reduced) {
-    return (
-      <section id="work" ref={sectionRef} aria-label={t.work.label} className="mx-auto max-w-4xl px-5 py-24 sm:px-8">
-        <div className="mb-12 flex flex-wrap items-center justify-between gap-4">
-          <p className="text-sm text-muted">{t.work.label}</p>
-          <Filters filter={filter} onChange={changeFilter} count={visible.length} />
-        </div>
-        <ol className="space-y-20">
-          {visible.map((project, i) => (
-            <li key={project.slug}>
-              <ProjectCard project={project} number={pad(projects.indexOf(project) + 1)} onOpen={() => setOpen(project.slug)} eager={i === 0} />
-            </li>
-          ))}
-        </ol>
-        {modal}
-      </section>
-    )
+    setFilter(`tech:${tech}`)
+    document.getElementById('work')?.scrollIntoView({ behavior: reduced ? 'instant' : 'smooth' })
   }
 
   return (
-    <section
-      id="work"
-      ref={sectionRef}
-      aria-label={t.work.label}
-      className="relative"
-      style={{ height: `${100 + total * 100}vh` }}
-    >
-      <div ref={stageRef} className="sticky top-0 h-[100svh] overflow-clip">
-        {/* Soft light behind the cards that drifts with the pointer */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0"
-          style={{ background: GLOW }}
-        />
-
-        <div className="absolute inset-x-0 top-20 z-[3000] mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 text-sm text-muted sm:px-8 md:top-24">
-          <div className="flex min-w-0 items-center gap-4">
-            <span className="hidden shrink-0 sm:inline">{t.work.label}</span>
-            <Filters filter={filter} onChange={changeFilter} count={visible.length} />
-          </div>
-          <span className="shrink-0 tabular-nums" aria-hidden="true" dir="ltr">
-            <span ref={counterRef} className="text-fg">
-              01
-            </span>{' '}
-            / {pad(visible.length)}
-          </span>
+    <section id="work" aria-labelledby="work-title" className="mx-auto max-w-6xl px-5 py-24 sm:px-8 md:py-32">
+      <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-8">
+        <div>
+          <p className="text-sm text-muted">{t.work.label}</p>
+          <Reveal as="h2" id="work-title" className="rise-on mt-6 max-w-2xl text-balance font-display text-4xl leading-[1.1] text-fg md:text-5xl">
+            <Words text={t.work.title} />
+          </Reveal>
         </div>
-
-        <div
-          className={`pointer-events-none h-full ${compact ? '[perspective:900px]' : '[perspective:1400px]'} [perspective-origin:50%_35%]`}
-        >
-          <ol
-            key={filter}
-            ref={sceneRef}
-            className="work-scene grid h-full place-items-center pt-14 pb-12 md:pt-32 md:pb-28 [transform-style:preserve-3d]"
-          >
-            {visible.map((project, i) => (
-              <li
-                key={project.slug}
-                ref={(el) => (cardRefs.current[i] = el)}
-                className="w-[min(88vw,calc((100svh-16rem)*0.8))] [grid-area:1/1] md:w-[min(880px,88vw,calc((100svh-21rem)*1.6))] [transform-style:preserve-3d] will-change-transform"
-              >
-                <ProjectCard
-                  project={project}
-                  number={pad(projects.indexOf(project) + 1)}
-                  onOpen={() => openProject(project.slug)}
-                  onFocus={bringForward(i)}
-                  eager={i < 2}
-                />
-              </li>
-            ))}
-          </ol>
-        </div>
-
-        {/* Progress: one segment per project, filling as it reaches the front; each one jumps there */}
-        <div className="absolute inset-x-0 bottom-6 z-[3000] mx-auto flex max-w-6xl items-end gap-6 px-5 sm:px-8 md:bottom-8">
-          <ol aria-label={t.work.progress} className="flex flex-1 gap-2 sm:gap-3">
-            {visible.map((project, i) => (
-              <li key={project.slug} className="min-w-0 flex-1">
-                <button
-                  ref={(el) => (segmentRefs.current[i] = el)}
-                  type="button"
-                  onClick={() => scrollToProject(i)}
-                  aria-label={t.work.goTo(pad(projects.indexOf(project) + 1), pick(project.title))}
-                  className="group block w-full pt-3 pb-1 text-start"
-                >
-                  <span className="relative block h-0.5 overflow-hidden rounded-full bg-line">
-                    <span className="absolute inset-0 origin-left scale-x-[var(--fill,0)] bg-accent rtl:origin-right" />
-                  </span>
-                  <span className="mt-2 hidden truncate text-xs text-muted transition-colors duration-300 group-hover:text-fg group-data-[active=true]:text-fg md:block">
-                    <span className="tabular-nums" dir="ltr">
-                      {pad(projects.indexOf(project) + 1)}
-                    </span>{' '}
-                    {pick(project.title)}
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ol>
-          <span ref={hintRef} aria-hidden="true" className="hidden pb-1 text-xs text-muted transition-opacity duration-500 sm:block">
-            {t.work.keepScrolling}
-          </span>
-        </div>
+        <Filters filter={filter} onChange={setFilter} count={visible.length} />
       </div>
-      {modal}
+
+      {list ? (
+        <div ref={listRef} onPointerMove={onListMove} onPointerLeave={onListLeave} className="relative mt-14 md:mt-20">
+          <ol key={filter} className="work-list border-b border-line">
+            {visible.map((project, i) => (
+              <li key={project.slug} className="row-in" style={{ '--i': i }}>
+                <ProjectRow project={project} onOpen={() => openProject(project.slug)} onEnter={onRowEnter(project.slug)} />
+              </li>
+            ))}
+          </ol>
+
+          {/* Follows the pointer (physical left/top: it's placed from clientX/Y) */}
+          <div
+            ref={previewRef}
+            aria-hidden="true"
+            className="pointer-events-none absolute top-0 left-0 z-10 w-[clamp(16rem,26vw,22rem)] will-change-transform"
+          >
+            <div
+              className={`relative aspect-[16/10] overflow-hidden rounded-[6px] border border-line bg-surface shadow-[0_30px_60px_-28px_rgb(40_25_10/0.45)] transition-[opacity,scale] duration-500 ease-out ${
+                hovered ? 'scale-100 opacity-100' : 'scale-90 opacity-0'
+              }`}
+            >
+              {visible.map((project) => (
+                <div
+                  key={project.slug}
+                  data-slug={project.slug}
+                  className={`absolute inset-0 transition-opacity duration-300 ${hovered === project.slug ? 'opacity-100' : 'opacity-0'}`}
+                >
+                  <ProjectVisual project={project} number={number(project)} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <ol key={filter} className="mt-12 space-y-16">
+          {visible.map((project, i) => (
+            <li key={project.slug} ref={(el) => (cardRefs.current[project.slug] = el)} className="row-in" style={{ '--i': i }}>
+              <ProjectCard project={project} number={number(project)} onOpen={() => openProject(project.slug)} eager={i === 0} />
+            </li>
+          ))}
+        </ol>
+      )}
+
+      {open !== null && (
+        <ProjectModal
+          projects={visible}
+          slug={open}
+          onSelect={setOpen}
+          onClose={() => setOpen(null)}
+          morphClose={morphClose}
+          morph={canMorph()}
+          onFilterTech={filterByTech}
+        />
+      )}
     </section>
   )
 }

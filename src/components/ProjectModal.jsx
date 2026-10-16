@@ -9,7 +9,7 @@ import Reveal from './Reveal'
 import { projects as allProjects } from '../data/projects'
 import { gallerySlides } from '../lib/gallery'
 import { useReducedMotion } from '../lib/hooks'
-import { pad } from '../lib/stage'
+import { pad } from '../lib/motion'
 import { useI18n } from '../i18n'
 
 // One part of the case study: a small label on the side, content beside it

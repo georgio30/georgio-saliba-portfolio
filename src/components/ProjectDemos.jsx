@@ -1,6 +1,5 @@
-import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { projects } from '../data/projects'
-import { clamp, pad, place } from '../lib/stage'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { clamp } from '../lib/motion'
 import { useI18n } from '../i18n'
 
 // Small, self-contained demos for the case studies, picked by id in a project's `demos` list.
@@ -353,86 +352,6 @@ function RecipesDemo() {
   )
 }
 
-/* This portfolio: the gallery's own placement function, driven by a slider */
-const STAGE_W = 1000
-const STAGE_H = 600
-
-function DepthDemo() {
-  const { t, pick } = useI18n()
-  const d = t.demos.depth
-  const uid = useId()
-  const last = projects.length - 1
-  const [p, setP] = useState(0)
-  const [compact, setCompact] = useState(false)
-  const boxRef = useRef(null)
-  const [scale, setScale] = useState(0.6)
-
-  // The scene is laid out at a fixed size and scaled to fit, so the 3D numbers match the real gallery
-  useLayoutEffect(() => {
-    const el = boxRef.current
-    const fit = () => setScale(el.clientWidth / STAGE_W)
-    fit()
-    const observer = new ResizeObserver(fit)
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
-
-  return (
-    <Frame title={d.title} note={d.hint}>
-      <div ref={boxRef} className="relative overflow-hidden rounded-[6px] border border-line bg-ink" style={{ height: STAGE_H * scale }}>
-        <div
-          aria-hidden="true"
-          className="absolute top-0 left-0 origin-top-left"
-          style={{ width: STAGE_W, height: STAGE_H, transform: `scale(${scale})` }}
-        >
-          <ol
-            className={`grid h-full place-items-center pt-24 [transform-style:preserve-3d] ${compact ? '[perspective:900px]' : '[perspective:1400px]'} [perspective-origin:50%_35%]`}
-          >
-            {projects.map((project, i) => {
-              const dd = i - p
-              const { z, transform, opacity, shade } = place(dd, i % 2 ? 1 : -1, compact, '%')
-              return (
-                <li
-                  key={project.slug}
-                  className="relative aspect-[16/10] w-[520px] overflow-hidden rounded-[6px] border border-[#1b1a18]/10 shadow-[0_24px_48px_-28px_rgb(60_40_20/0.35)] [grid-area:1/1]"
-                  style={{ transform, opacity, zIndex: Math.round(2000 + z), backgroundColor: project.tone }}
-                >
-                  <div className="flex h-full flex-col justify-end p-8 text-[#1b1a18]">
-                    <span className="text-lg text-[#1b1a18]/50 tabular-nums">{pad(i + 1)}</span>
-                    <span className="font-display text-5xl leading-tight">{pick(project.title)}</span>
-                  </div>
-                  <div className="absolute inset-0 bg-ink" style={{ opacity: shade }} />
-                </li>
-              )
-            })}
-          </ol>
-        </div>
-      </div>
-
-      <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3">
-        <label htmlFor={`${uid}-p`} className="text-sm text-muted">
-          {d.position}
-        </label>
-        <input
-          id={`${uid}-p`}
-          type="range"
-          min={0}
-          max={last}
-          step={0.01}
-          value={p}
-          onChange={(e) => setP(Number(e.target.value))}
-          aria-valuetext={`${(p + 1).toFixed(1)} / ${last + 1}`}
-          className="min-w-40 flex-1 accent-[var(--color-accent)]"
-        />
-        <label className="flex cursor-pointer items-center gap-2 text-sm text-fg">
-          <input type="checkbox" checked={compact} onChange={(e) => setCompact(e.target.checked)} className="size-4 accent-[var(--color-accent)]" />
-          {d.phone}
-        </label>
-      </div>
-    </Frame>
-  )
-}
-
 /* This portfolio: the original PNG screenshot against the WebP the site actually serves */
 // The size of the file the browser actually picked (from its cache, so nothing is downloaded twice)
 const sizeOf = async (img) => {
@@ -517,7 +436,7 @@ function ImagesDemo() {
   )
 }
 
-const demos = { access: AccessDemo, checkout: CheckoutDemo, recipes: RecipesDemo, depth: DepthDemo, images: ImagesDemo }
+const demos = { access: AccessDemo, checkout: CheckoutDemo, recipes: RecipesDemo, images: ImagesDemo }
 
 export default function ProjectDemos({ project }) {
   return (

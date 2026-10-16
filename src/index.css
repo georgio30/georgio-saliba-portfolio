@@ -151,7 +151,8 @@ body {
   }
 
   .rise .w > span,
-  .rise-on .w > span {
+  .rise-on .w > span,
+  .row-in {
     animation: none !important;
     transform: none;
   }
@@ -273,7 +274,7 @@ body {
   animation: mine-hold 350ms linear both;
 }
 
-/* Selected work: the light on a card, a new filter settling in, and the card-to-case-study morph */
+/* Selected work: the light on a card, and the image-to-case-study morph */
 /* No blend mode here: blending inside the 3D scene can stop Chrome from painting it */
 .card-sheen {
   background: radial-gradient(circle at var(--lx, 50%) var(--ly, 30%), rgb(255 255 255 / 0.28), transparent 55%);
@@ -294,15 +295,23 @@ body {
   }
 }
 
-@keyframes work-in {
+/* The project list: rows settle in one after another, and hovering one quiets the rest */
+@keyframes row-in {
   from {
     opacity: 0;
-    transform: translate3d(0, 24px, -160px);
+    transform: translateY(18px);
   }
 }
 
-.work-scene {
-  animation: work-in 0.7s var(--ease-out-soft);
+.row-in {
+  animation: row-in 0.7s var(--ease-out-soft) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+
+@media (hover: hover) {
+  .work-list:has(.work-row:hover) .work-row:not(:hover) {
+    opacity: 0.35;
+  }
 }
 
 ::view-transition-group(project-visual) {

@@ -24,7 +24,7 @@ export default {
     note: ['schema → API → UI,', 'all of it.'],
     intro: 'React and TypeScript interfaces on top of Node.js APIs and MySQL. Scroll down to walk through a few of them.',
     explore: 'Explore work',
-    introWorld: 'React and TypeScript interfaces on top of Node.js APIs and MySQL. Roll around the island to visit a few of them, or scroll for the full tour.',
+    introWorld: 'React and TypeScript interfaces on top of Node.js APIs and MySQL. Roll around the island to visit a few of them, or scroll down for the full list.',
   },
   world: {
     role: 'Interactive island',
@@ -37,7 +37,7 @@ export default {
   },
   work: {
     label: 'Selected work',
-    keepScrolling: 'Keep scrolling',
+    title: 'Things I’ve built, from the database to the button.',
     openProject: (number, title) => `Open project ${number}: ${title}`,
     viewProject: 'View project',
     explore: 'Explore',
@@ -46,7 +46,6 @@ export default {
     builtWith: (tech) => `Built with ${tech}`,
     clearFilter: (tech) => `Remove filter: ${tech}`,
     showing: (n) => (n === 1 ? 'Showing 1 project' : `Showing ${n} projects`),
-    progress: 'Projects in this gallery',
     goTo: (number, title) => `Go to project ${number}: ${title}`,
   },
   gallery: {
@@ -156,12 +155,6 @@ export default {
       found: (n) => (n === 1 ? '1 recipe found' : `${n} recipes found`),
       minutes: (n) => `${n} min`,
       sample: 'Sample data, offline. The app itself asks the Spoonacular API.',
-    },
-    depth: {
-      title: 'Scrub the gallery yourself',
-      position: 'Scroll position',
-      phone: 'Phone version',
-      hint: 'The same function that places the cards above, driven by a slider instead of the page scroll.',
     },
     images: {
       title: 'Before and after: PNG to WebP',
@@ -297,7 +290,7 @@ export default {
     title: 'How this site is made, and what it took.',
     challenges: 'Interesting problems I solved',
     lab: {
-      title: 'Why the gallery eases by time, not by frame',
+      title: 'Why motion here eases by time, not by frame',
       intro: 'Every smooth move on this site closes part of the gap to its target each frame. Do that by a fixed share per frame and it runs fast on a 144 Hz screen and slow on a 30 fps phone. Pick a frame rate and race the two versions.',
       rate: 'Frame rate (fps)',
       smoothing: 'Smoothing',
@@ -306,7 +299,7 @@ export default {
       timed: 'Share from elapsed time',
       arrived: (time) => `95% there in ${time}`,
       codeNaive: 'per frame: tuned at 60 fps',
-      codeTimed: 'by time, from src/lib/stage.js',
+      codeTimed: 'by time, from src/lib/motion.js',
       hint: 'Press Race, then try 30 or 144.',
       same: 'At 60 fps they match: that’s the screen the naive one was tuned on.',
       differ: (fps) => `At ${fps} fps the per-frame version drifts; the timed one arrives at the same moment on every screen.`,

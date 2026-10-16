@@ -30,7 +30,7 @@ export default {
       'Des interfaces React et TypeScript posées sur des API Node.js et MySQL. Faites défiler pour en découvrir quelques-unes.',
     explore: 'Voir les projets',
     introWorld:
-      'Des interfaces React et TypeScript posées sur des API Node.js et MySQL. Faites rouler la bille sur l’île pour en visiter quelques-unes, ou faites défiler pour la visite complète.',
+      'Des interfaces React et TypeScript posées sur des API Node.js et MySQL. Faites rouler la bille sur l’île pour en visiter quelques-unes, ou faites défiler pour la liste complète.',
   },
   world: {
     role: 'Île interactive',
@@ -43,7 +43,7 @@ export default {
   },
   work: {
     label: 'Projets choisis',
-    keepScrolling: 'Continuez à défiler',
+    title: 'Ce que j’ai construit, de la base de données au bouton.',
     openProject: (number, title) => `Ouvrir le projet ${number}\u00a0: ${title}`,
     viewProject: 'Voir le projet',
     explore: 'Découvrir',
@@ -52,7 +52,6 @@ export default {
     builtWith: (tech) => `Avec ${tech}`,
     clearFilter: (tech) => `Retirer le filtre : ${tech}`,
     showing: (n) => (n === 1 ? '1 projet affiché' : `${n} projets affichés`),
-    progress: 'Projets de la galerie',
     goTo: (number, title) => `Aller au projet ${number} : ${title}`,
   },
   gallery: {
@@ -162,12 +161,6 @@ export default {
       found: (n) => (n === 1 ? '1 recette trouvée' : `${n} recettes trouvées`),
       minutes: (n) => `${n} min`,
       sample: 'Données d’exemple, hors ligne. L’appli interroge l’API Spoonacular.',
-    },
-    depth: {
-      title: 'Faites défiler la galerie vous-même',
-      position: 'Position de défilement',
-      phone: 'Version téléphone',
-      hint: 'La même fonction qui place les cartes plus haut, pilotée par un curseur au lieu du défilement.',
     },
     images: {
       title: 'Avant et après : du PNG au WebP',
@@ -304,7 +297,7 @@ export default {
     title: 'Comment ce site est fabriqué, et ce que cela a demandé.',
     challenges: 'Des problèmes intéressants résolus',
     lab: {
-      title: 'Pourquoi la galerie s’amortit au temps, pas à l’image',
+      title: 'Pourquoi le mouvement s’amortit au temps, pas à l’image',
       intro: 'Chaque mouvement fluide du site comble à chaque image une part de l’écart avec sa cible. Avec une part fixe par image, il va vite sur un écran 144 Hz et lentement sur un téléphone à 30 i/s. Choisissez une fréquence et faites courir les deux versions.',
       rate: 'Fréquence (i/s)',
       smoothing: 'Amorti',
@@ -313,7 +306,7 @@ export default {
       timed: 'Part selon le temps écoulé',
       arrived: (time) => `À 95 % en ${time}`,
       codeNaive: 'par image : réglé à 60 i/s',
-      codeTimed: 'au temps, depuis src/lib/stage.js',
+      codeTimed: 'au temps, depuis src/lib/motion.js',
       hint: 'Appuyez sur Lancer, puis essayez 30 ou 144.',
       same: 'À 60 i/s, ils coïncident : c’est l’écran sur lequel la version naïve a été réglée.',
       differ: (fps) => `À ${fps} i/s, la version par image dérive ; celle au temps arrive au même moment sur tous les écrans.`,

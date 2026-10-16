@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { projects } from '../data/projects'
-import { pad } from '../lib/stage'
+import { pad } from '../lib/motion'
 import { useMediaQuery, useReducedMotion, useTheme } from '../lib/hooks'
 import { openProject } from '../lib/island'
 import { useI18n } from '../i18n'

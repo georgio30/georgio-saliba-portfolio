@@ -5,27 +5,27 @@ export const craftPoints = [
     id: 'performance',
     title: { en: 'Performance', fr: 'Performance', ar: 'الأداء' },
     text: {
-      en: 'The one library besides React is three.js, for the island at the top. It loads in its own chunk once the page has painted, and pauses when it’s off screen. The gallery is plain CSS transforms and the translations are plain objects. Screenshots are WebP at two sizes and lazy-loaded, and the theme and language are applied before first paint so nothing flashes.',
-      fr: 'La seule bibliothèque en plus de React est three.js, pour l’île en haut de page : elle se charge à part, une fois la page affichée, et se met en pause hors de l’écran. La galerie repose sur des transformations CSS et les traductions sont de simples objets. Les captures sont en WebP en deux tailles, chargées à la demande, et le thème comme la langue s’appliquent avant le premier affichage, sans scintillement.',
-      ar: 'المكتبة الوحيدة إلى جانب React هي three.js للجزيرة في أعلى الصفحة، وتُحمَّل في جزء منفصل بعد ظهور الصفحة وتتوقف حين تخرج من الشاشة. المعرض تحويلات CSS والترجمات كائنات بسيطة. لقطات الشاشة بصيغة WebP بحجمين وتُحمَّل عند الحاجة، ويُطبَّق الوضع واللغة قبل أول عرض فلا يحدث وميض.',
+      en: 'The one library besides React is three.js, for the island at the top. It loads in its own chunk once the page has painted, and pauses when it’s off screen. There’s no animation or translation library: motion is a few lines of requestAnimationFrame and the translations are plain objects. Screenshots are WebP at two sizes and lazy-loaded, and the theme and language are applied before first paint so nothing flashes.',
+      fr: 'La seule bibliothèque en plus de React est three.js, pour l’île en haut de page : elle se charge à part, une fois la page affichée, et se met en pause hors de l’écran. Aucune bibliothèque d’animation ni de traduction : le mouvement tient en quelques lignes de requestAnimationFrame et les traductions sont de simples objets. Les captures sont en WebP en deux tailles, chargées à la demande, et le thème comme la langue s’appliquent avant le premier affichage, sans scintillement.',
+      ar: 'المكتبة الوحيدة إلى جانب React هي three.js للجزيرة في أعلى الصفحة، وتُحمَّل في جزء منفصل بعد ظهور الصفحة وتتوقف حين تخرج من الشاشة. لا مكتبة رسوم متحركة ولا ترجمة: الحركة بضعة أسطر من requestAnimationFrame والترجمات كائنات بسيطة. لقطات الشاشة بصيغة WebP بحجمين وتُحمَّل عند الحاجة، ويُطبَّق الوضع واللغة قبل أول عرض فلا يحدث وميض.',
     },
   },
   {
     id: 'responsive',
     title: { en: 'Responsive design', fr: 'Design responsive', ar: 'التصميم المتجاوب' },
     text: {
-      en: 'Mobile-first layouts in Tailwind. On phones the 3D gallery gets a flatter, shallower version, and its cards switch to a portrait phone screenshot when a project has one.',
-      fr: 'Des mises en page pensées d’abord pour le mobile, avec Tailwind. Sur téléphone, la galerie 3D devient plus plate et moins profonde, et ses cartes passent à une capture portrait quand le projet en a une.',
-      ar: 'تخطيطات تبدأ من الهاتف باستخدام Tailwind. على الهواتف يصبح المعرض ثلاثي الأبعاد أكثر تسطّحًا وأقل عمقًا، وتتحول بطاقاته إلى لقطة هاتف طولية إن وُجدت للمشروع.',
+      en: 'Mobile-first layouts in Tailwind. On phones the island moves under the headline and answers to taps, and the project list turns into cards that switch to a portrait screenshot when a project has one.',
+      fr: 'Des mises en page pensées d’abord pour le mobile, avec Tailwind. Sur téléphone, l’île passe sous le titre et répond au toucher, et la liste des projets devient des cartes qui passent à une capture portrait quand le projet en a une.',
+      ar: 'تخطيطات تبدأ من الهاتف باستخدام Tailwind. على الهواتف تنتقل الجزيرة تحت العنوان وتستجيب للمس، وتتحول قائمة المشاريع إلى بطاقات تعرض لقطة هاتف طولية إن وُجدت للمشروع.',
     },
   },
   {
     id: 'accessibility',
     title: { en: 'Accessibility', fr: 'Accessibilité', ar: 'سهولة الوصول' },
     text: {
-      en: 'A skip link, visible focus rings and translated image descriptions. The project lightbox moves focus in, makes the page behind inert and gives focus back on close. Everything works by keyboard, and with reduced motion on, the 3D gallery becomes a plain list.',
-      fr: 'Un lien d’évitement, des contours de focus visibles et des descriptions d’images traduites. La visionneuse de projet déplace le focus, rend la page derrière inerte et le restitue à la fermeture. Tout fonctionne au clavier, et avec le mouvement réduit, la galerie 3D devient une simple liste.',
-      ar: 'رابط لتخطي التنقل، وحدود تركيز واضحة، ووصف مترجم للصور. تنقل نافذة المشروع التركيز إليها وتجعل الصفحة خلفها غير تفاعلية وتعيد التركيز عند الإغلاق. كل شيء يعمل بلوحة المفاتيح، ومع تقليل الحركة يتحول المعرض ثلاثي الأبعاد إلى قائمة بسيطة.',
+      en: 'A skip link, visible focus rings and translated image descriptions. The project lightbox moves focus in, makes the page behind inert and gives focus back on close. Everything works by keyboard, the island included, and with reduced motion on, nothing drifts or idles.',
+      fr: 'Un lien d’évitement, des contours de focus visibles et des descriptions d’images traduites. La visionneuse de projet déplace le focus, rend la page derrière inerte et le restitue à la fermeture. Tout fonctionne au clavier, l’île comprise, et avec le mouvement réduit, rien ne dérive ni ne s’anime tout seul.',
+      ar: 'رابط لتخطي التنقل، وحدود تركيز واضحة، ووصف مترجم للصور. تنقل نافذة المشروع التركيز إليها وتجعل الصفحة خلفها غير تفاعلية وتعيد التركيز عند الإغلاق. كل شيء يعمل بلوحة المفاتيح، بما في ذلك الجزيرة، ومع تقليل الحركة لا شيء ينجرف أو يتحرك من تلقاء نفسه.',
     },
   },
   {
@@ -50,16 +50,16 @@ export const craftPoints = [
 
 export const challenges = [
   {
-    title: { en: 'A 3D gallery with no 3D library', fr: 'Une galerie 3D sans bibliothèque 3D', ar: 'معرض ثلاثي الأبعاد دون مكتبة' },
+    title: { en: 'A 3D world that doesn’t cost the first paint', fr: 'Un monde 3D qui ne retarde pas le premier affichage', ar: 'عالم ثلاثي الأبعاد لا يؤخّر أول عرض' },
     problem: {
-      en: 'Scroll-linked 3D usually means a heavy dependency, and it still has to work on phones and for people who ask for less motion.',
-      fr: 'La 3D liée au défilement implique souvent une dépendance lourde, et elle doit quand même fonctionner sur téléphone et pour ceux qui demandent moins de mouvement.',
-      ar: 'التأثيرات ثلاثية الأبعاد المرتبطة بالتمرير تعني عادةً مكتبة ثقيلة، ويجب أن تعمل على الهواتف ولمن يطلبون حركة أقل.',
+      en: 'three.js is heavier than the rest of the site put together, WebGL isn’t everywhere, and a canvas means nothing to a screen reader or a keyboard.',
+      fr: 'three.js pèse plus que tout le reste du site, WebGL n’est pas disponible partout, et un canvas ne dit rien à un lecteur d’écran ni au clavier.',
+      ar: 'مكتبة three.js أثقل من بقية الموقع مجتمعًا، وWebGL غير متاح في كل مكان، واللوحة (canvas) لا تعني شيئًا لقارئ الشاشة أو لوحة المفاتيح.',
     },
     solution: {
-      en: 'Each card’s position is computed from the scroll offset and written straight to its CSS transform inside requestAnimationFrame, so React never re-renders while scrolling. Phones get a shallower scene, and reduced motion gets a plain list.',
-      fr: 'La position de chaque carte est calculée depuis le défilement et écrite directement dans sa transformation CSS dans requestAnimationFrame, donc React ne se redessine pas pendant le défilement. Les téléphones ont une scène moins profonde, et le mouvement réduit une simple liste.',
-      ar: 'يُحسب موضع كل بطاقة من موضع التمرير ويُكتب مباشرة في تحويل CSS داخل requestAnimationFrame، فلا يعيد React الرسم أثناء التمرير. الهواتف تحصل على مشهد أقل عمقًا، وتقليل الحركة يعطي قائمة بسيطة.',
+      en: 'The island is a dynamic import that starts once the browser is idle, in its own chunk, and pauses whenever it’s off screen or the tab is hidden. The labels are HTML buttons placed over the landmarks each frame, so Tab, Enter, screen readers, translation and right-to-left all work as they do everywhere else. Without WebGL the hero is just text.',
+      fr: 'L’île est un import dynamique lancé quand le navigateur est inactif, dans son propre fichier, et se met en pause hors de l’écran ou quand l’onglet est caché. Les étiquettes sont des boutons HTML placés sur les repères à chaque image : Tab, Entrée, lecteurs d’écran, traduction et droite à gauche fonctionnent comme partout ailleurs. Sans WebGL, l’en-tête reste simplement du texte.',
+      ar: 'الجزيرة استيراد ديناميكي يبدأ حين يتفرغ المتصفح، في ملف مستقل، وتتوقف حين تخرج من الشاشة أو يُخفى التبويب. التسميات أزرار HTML توضع فوق المعالم في كل إطار، فيعمل Tab وEnter وقارئ الشاشة والترجمة والاتجاه من اليمين إلى اليسار كما في بقية الموقع. ودون WebGL تبقى الواجهة نصًا فقط.',
     },
   },
   {

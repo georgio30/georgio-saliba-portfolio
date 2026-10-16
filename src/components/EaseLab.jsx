@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ease } from '../lib/stage'
+import { ease } from '../lib/motion'
 import { useReducedMotion } from '../lib/hooks'
 import { useI18n } from '../i18n'
 
