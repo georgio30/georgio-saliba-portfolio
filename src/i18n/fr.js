@@ -35,7 +35,13 @@ export default {
   world: {
     role: 'Île interactive',
     label: 'L’île des projets : un repère par projet',
-    open: 'Ouvrir',
+    open: 'Voir l’étude de cas',
+    skip: 'Passer aux projets',
+    visited: (n, total) => `${n} sur ${total} visités`,
+    done: 'Vous avez visité tous les repères.',
+    next: 'Envie d’en savoir plus\u00a0?',
+    nextDone: 'Prochaine étape\u00a0:',
+    resume: 'CV',
     hintMouse: 'Cliquez sur l’île pour y rouler · cliquez sur un repère pour le visiter',
     hintTouch: 'Touchez l’île pour y rouler · touchez un repère pour le visiter',
     hintKeys: 'Flèches ou ZQSD pour rouler · Entrée pour ouvrir',
@@ -64,6 +70,12 @@ export default {
     layers: 'Comment c’est construit',
   },
   project: {
+    after: {
+      label: 'Et ensuite',
+      island: 'Retour à l’île',
+      compare: 'Comparer tous les projets',
+      contact: 'Me contacter',
+    },
     project: 'Projet',
     close: 'Fermer le projet',
     year: 'Année',

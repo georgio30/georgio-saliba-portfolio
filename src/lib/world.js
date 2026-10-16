@@ -195,6 +195,7 @@ export function createWorld(canvas, { count, tones, reduced = false, onFrame, on
   let target = null
   let goal = -1
   let near = -1
+  let hover = -1
   let pingT = 1
   let frame = { focusX: 0.5, width: 1 }
   let size = { w: 1, h: 1 }
@@ -220,7 +221,7 @@ export function createWorld(canvas, { count, tones, reduced = false, onFrame, on
     const tan = Math.tan(((FOV / 2) * Math.PI) / 180)
     const aspect = size.w / size.h
     const fitWidth = (ISLAND * 2 + 1.6) / (frame.width * 2 * tan * aspect)
-    const fitHeight = 14 / (2 * tan)
+    const fitHeight = 15 / (2 * tan)
     return Math.max(fitWidth, fitHeight)
   }
 
@@ -294,20 +295,27 @@ export function createWorld(canvas, { count, tones, reduced = false, onFrame, on
     start()
   }
 
+  // The landmark under the mouse lifts a little, as a hint that it can be clicked
+  function setHover(i) {
+    if (i === hover) return
+    hover = i
+    start()
+  }
+
   function setPointer(x, y) {
     pointer.tx = x
     pointer.ty = y
     start()
   }
 
-  // A click or tap at canvas coordinates: a landmark, or a spot on the island
+  // A click or tap at canvas coordinates. Returns the landmark's index, 'ground', or null for empty sky
   function pick(x, y, act = true) {
     ndc.set((x / size.w) * 2 - 1, -(y / size.h) * 2 + 1)
     raycaster.setFromCamera(ndc, camera)
     const [first] = raycaster.intersectObjects(pickables, false)
     if (first) {
       if (act) onPick?.(first.object.userData.project)
-      return 'project'
+      return first.object.userData.project
     }
     if (!raycaster.ray.intersectPlane(ground, hit)) return null
     const d = Math.hypot(hit.x, hit.z)
@@ -407,7 +415,7 @@ export function createWorld(canvas, { count, tones, reduced = false, onFrame, on
     clock += dt / 1000
     const k = smooth(dt, 140)
     landmarks.forEach((l, i) => {
-      const on = i === near ? 1 : 0
+      const on = i === near ? 1 : i === hover ? 0.45 : 0
       l.lift += (on - l.lift) * k
       l.glow += (on - l.glow) * k
       l.shape.position.y = l.base + l.lift * 0.35 + (reduced ? 0 : Math.sin(clock * 1.4 + i) * 0.06)
@@ -463,7 +471,7 @@ export function createWorld(canvas, { count, tones, reduced = false, onFrame, on
       pingT >= 1 &&
       Math.abs(pointer.tx - pointer.x) < 0.001 &&
       Math.abs(pointer.ty - pointer.y) < 0.001 &&
-      landmarks.every((l) => Math.abs(l.lift - (landmarks.indexOf(l) === near ? 1 : 0)) < 0.002) &&
+      landmarks.every((l, i) => Math.abs(l.lift - (i === near ? 1 : i === hover ? 0.45 : 0)) < 0.002) &&
       trees.every((t) => Math.abs(t.wobble) < 0.001 && Math.abs(t.wobbleV) < 0.001)
     )
   }
@@ -517,6 +525,7 @@ export function createWorld(canvas, { count, tones, reduced = false, onFrame, on
     setTheme,
     setInput,
     setPointer,
+    setHover,
     goTo,
     pick,
     start,

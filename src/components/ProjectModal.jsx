@@ -33,7 +33,7 @@ function Part({ id, label, children, className = '' }) {
 
 // The case study: gallery, overview, numbers, story, challenges, architecture, demos and result.
 // `projects` is the gallery as currently filtered, for "Next project".
-export default function ProjectModal({ projects, slug, onSelect, onClose, morphClose, morph, onFilterTech }) {
+export default function ProjectModal({ projects, slug, onSelect, onClose, morphClose, morph, onFilterTech, origin = 'list', onLeave }) {
   const project = allProjects.find((p) => p.slug === slug)
   const study = project.caseStudy
   const { t, pick, dir } = useI18n()
@@ -124,6 +124,8 @@ export default function ProjectModal({ projects, slug, onSelect, onClose, morphC
   const pool = projects.length > 1 ? projects : allProjects
   const next = pool[(pool.findIndex((p) => p.slug === slug) + 1) % pool.length]
   const number = allProjects.indexOf(project) + 1
+  const afterButton =
+    'rounded-full border border-line px-4 py-2 text-sm text-fg transition-colors duration-200 hover:border-fg/30 hover:text-accent'
 
   return createPortal(
     <div
@@ -325,6 +327,30 @@ export default function ProjectModal({ projects, slug, onSelect, onClose, morphC
                 </span>
               </span>
             </button>
+
+            {/* Where to go from here: back where they came from, all the projects side by side, or a conversation */}
+            <nav aria-label={t.project.after.label} className="mt-8 flex flex-wrap gap-2">
+              {origin === 'island' && (
+                <button type="button" onClick={close} className={afterButton}>
+                  <span aria-hidden="true" className="inline-block rtl:-scale-x-100">
+                    ←
+                  </span>{' '}
+                  {t.project.after.island}
+                </button>
+              )}
+              {onLeave && (
+                <>
+                  {origin === 'island' && (
+                    <button type="button" onClick={() => onLeave('work')} className={afterButton}>
+                      {t.project.after.compare}
+                    </button>
+                  )}
+                  <button type="button" onClick={() => onLeave('contact')} className={afterButton}>
+                    {t.project.after.contact}
+                  </button>
+                </>
+              )}
+            </nav>
           </footer>
         </article>
       </div>

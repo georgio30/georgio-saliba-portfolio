@@ -29,7 +29,13 @@ export default {
   world: {
     role: 'Interactive island',
     label: 'Project island: one landmark per project',
-    open: 'Open',
+    open: 'Open case study',
+    skip: 'Skip to the projects',
+    visited: (n, total) => `${n} of ${total} visited`,
+    done: 'You’ve visited every landmark.',
+    next: 'Want more?',
+    nextDone: 'Next stop:',
+    resume: 'Résumé',
     hintMouse: 'Click the island to roll there · click a landmark to visit',
     hintTouch: 'Tap the island to roll there · tap a landmark to visit',
     hintKeys: 'Arrows or WASD to roll · Enter to open',
@@ -58,6 +64,12 @@ export default {
     layers: "How it's put together",
   },
   project: {
+    after: {
+      label: 'Where to next',
+      island: 'Back to the island',
+      compare: 'Compare all projects',
+      contact: 'Get in touch',
+    },
     project: 'Project',
     close: 'Close project',
     year: 'Year',

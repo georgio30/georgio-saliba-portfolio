@@ -114,6 +114,9 @@ export default function ProjectShowcase() {
   const [filter, setFilter] = useState('all')
   const [open, setOpen] = useState(null)
   const [hovered, setHovered] = useState(null)
+  // Where the open case study came from: 'island' or 'list'
+  const [origin, setOrigin] = useState('list')
+  const islandCard = useRef(null)
 
   const visible = useMemo(() => projects.filter((p) => matches(p, filter)), [filter])
 
@@ -181,6 +184,7 @@ export default function ProjectShowcase() {
 
   // Opening: the image grows into the case study's gallery
   const openProject = (slug) => {
+    setOrigin('list')
     const visual = visualFor(slug)
     if (!canMorph() || !visual) return setOpen(slug)
     visual.style.viewTransitionName = MORPH
@@ -195,7 +199,9 @@ export default function ProjectShowcase() {
   // Closing: shrinks back into its card on phones. On desktop the pointer has usually moved on,
   // so the case study fades out by itself (returning false says so)
   const morphClose = () => {
-    const visual = list ? null : visualFor(open)
+    // Opened from the island: shrink back into the landmark's card, which is still there
+    const card = origin === 'island' && islandCard.current?.isConnected ? islandCard.current : null
+    const visual = card ?? (list ? null : visualFor(open))
     if (!canMorph() || !visual) return false
     const transition = document.startViewTransition(() => {
       flushSync(() => setOpen(null))
@@ -206,15 +212,33 @@ export default function ProjectShowcase() {
     return true
   }
 
-  // From the hero's island: open a project's case study straight away, whatever the filter
+  // From the hero's island: the landmark's card grows into the case study, whatever the filter
   useEffect(() => {
     const onOpen = (e) => {
-      if (!visible.some((p) => p.slug === e.detail)) setFilter('all')
-      setOpen(e.detail)
+      const { slug, from } = e.detail
+      islandCard.current = from
+      const show = () => {
+        if (!visible.some((p) => p.slug === slug)) setFilter('all')
+        setOrigin('island')
+        setOpen(slug)
+      }
+      if (!canMorph() || !from) return show()
+      from.style.viewTransitionName = MORPH
+      const transition = document.startViewTransition(() => {
+        from.style.viewTransitionName = ''
+        flushSync(show)
+      })
+      transition.ready.catch(() => {})
     }
     window.addEventListener('open-project', onOpen)
     return () => window.removeEventListener('open-project', onOpen)
-  }, [visible])
+  })
+
+  // Leaving a case study for another part of the page: close it at once, then go there
+  const leaveTo = (id) => {
+    flushSync(() => setOpen(null))
+    document.getElementById(id)?.scrollIntoView({ behavior: reduced ? 'instant' : 'smooth' })
+  }
 
   // From a technology tag in a case study: close it and show every project that uses it
   const filterByTech = (tech) => {
@@ -288,6 +312,8 @@ export default function ProjectShowcase() {
           morphClose={morphClose}
           morph={canMorph()}
           onFilterTech={filterByTech}
+          origin={origin}
+          onLeave={leaveTo}
         />
       )}
     </section>

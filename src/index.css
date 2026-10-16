@@ -152,7 +152,8 @@ body {
 
   .rise .w > span,
   .rise-on .w > span,
-  .row-in {
+  .row-in,
+  .world-card {
     animation: none !important;
     transform: none;
   }
@@ -293,6 +294,18 @@ body {
   [dir="rtl"] .chip-row {
     mask-image: linear-gradient(to left, #000 calc(100% - 1.5rem), transparent);
   }
+}
+
+/* The island: a landmark's card opening up when the ball arrives, and the "what next" links appearing */
+@keyframes world-card {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+.world-card {
+  animation: world-card 0.45s var(--ease-out-soft) both;
 }
 
 /* The project list: rows settle in one after another, and hovering one quiets the rest */

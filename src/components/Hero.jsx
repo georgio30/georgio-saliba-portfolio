@@ -56,7 +56,7 @@ export default function Hero() {
         ref={innerRef}
         className={`relative z-10 mx-auto w-full max-w-6xl origin-top px-5 pt-28 sm:px-8 ${world ? 'pb-6 lg:pointer-events-none lg:pb-20' : 'pb-20'}`}
       >
-        <Reveal className={world ? 'lg:pointer-events-auto lg:max-w-[46%]' : ''}>
+        <Reveal className={world ? 'lg:pointer-events-auto lg:max-w-[42%]' : ''}>
           <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
             <span className="font-medium text-fg">{pick(profile.name)}</span>
             <span aria-hidden="true" className="h-px w-6 bg-line" />
@@ -136,7 +136,7 @@ export default function Hero() {
       </div>
 
       {world && (
-        <div ref={worldRef} className="relative h-[min(54svh,27rem)] w-full lg:absolute lg:inset-0 lg:h-auto">
+        <div ref={worldRef} className="relative h-[min(64svh,32rem)] w-full lg:absolute lg:inset-x-0 lg:top-0 lg:h-[100svh]">
           <HeroWorld className="absolute inset-0" />
         </div>
       )}

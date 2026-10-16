@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { projects } from '../data/projects'
+import { profile } from '../data/resume'
 import { pad } from '../lib/motion'
 import { useMediaQuery, useReducedMotion, useTheme } from '../lib/hooks'
 import { openProject } from '../lib/island'
@@ -37,6 +38,19 @@ export default function HeroWorld({ className = '' }) {
   const [ready, setReady] = useState(false)
   const [failed, setFailed] = useState(false)
   const [near, setNear] = useState(-1)
+  // Landmarks reached on this visit, for the progress dots and the "what next" links
+  const [visited, setVisited] = useState(() => new Set())
+
+  // Opening from a landmark: its card is what grows into the case study
+  const open = (i) => {
+    setVisited((v) => new Set(v).add(i))
+    openProject(projects[i].slug, labelRefs.current[i]?.querySelector('button'))
+  }
+  // The world is built once, so its click handler reaches the latest `open` through a ref
+  const openRef = useRef(open)
+  useEffect(() => {
+    openRef.current = open
+  })
 
   // Load three.js and build the world once the browser has a quiet moment after first paint
   useEffect(() => {
@@ -55,8 +69,9 @@ export default function HeroWorld({ className = '' }) {
             onNear: (i) => {
               nearRef.current = i
               setNear(i)
+              if (i >= 0) setVisited((v) => (v.has(i) ? v : new Set(v).add(i)))
             },
-            onPick: (i) => (nearRef.current === i ? openProject(projects[i].slug) : world.goTo(i)),
+            onPick: (i) => (nearRef.current === i ? openRef.current(i) : world.goTo(i)),
             onFrame: (points) =>
               points.forEach((p, i) => {
                 const el = labelRefs.current[i]
@@ -87,7 +102,7 @@ export default function HeroWorld({ className = '' }) {
   // On wide screens the island sits beside the headline, on the side away from the text
   useEffect(() => {
     if (!ready) return
-    worldRef.current.setFrame(wide ? { focusX: dir === 'rtl' ? 0.3 : 0.7, width: 0.44 } : { focusX: 0.5, width: 0.98 })
+    worldRef.current.setFrame(wide ? { focusX: dir === 'rtl' ? 0.31 : 0.69, width: 0.54 } : { focusX: 0.5, width: 1 })
   }, [ready, wide, dir])
 
   // Size, and only running while it's on screen and the tab is visible
@@ -137,9 +152,14 @@ export default function HeroWorld({ className = '' }) {
       if (e.pointerType !== 'mouse') return
       const [x, y, r] = local(e)
       if (!reduced) world.setPointer(x / r.width - 0.5, y / r.height - 0.5)
-      canvas.style.cursor = world.pick(x, y, false) ? 'pointer' : ''
+      const hit = world.pick(x, y, false)
+      world.setHover(typeof hit === 'number' ? hit : -1)
+      canvas.style.cursor = hit === null ? '' : 'pointer'
     }
-    const onLeave = () => world.setPointer(0, 0)
+    const onLeave = () => {
+      world.setPointer(0, 0)
+      world.setHover(-1)
+    }
     canvas.addEventListener('pointerdown', onDown)
     canvas.addEventListener('pointerup', onUp)
     canvas.addEventListener('pointermove', onMove)
@@ -166,13 +186,15 @@ export default function HeroWorld({ className = '' }) {
   }
   const onKeyDown = (e) => {
     if (e.altKey || e.ctrlKey || e.metaKey) return
-    if (KEYS[e.code]) {
+    // Arrows drive the ball from the island itself or a landmark, not from the links underneath
+    const driving = e.target === wrapRef.current || e.target.dataset.landmark !== undefined
+    if (KEYS[e.code] && driving) {
       e.preventDefault()
       held.current.add(e.code)
       applyKeys()
     } else if (e.key === 'Enter' && e.target === wrapRef.current && nearRef.current >= 0) {
       e.preventDefault()
-      openProject(projects[nearRef.current].slug)
+      open(nearRef.current)
     }
   }
   const onKeyUp = (e) => {
@@ -187,6 +209,9 @@ export default function HeroWorld({ className = '' }) {
   if (failed) return null
 
   const nearProject = projects[near]
+  const done = visited.size === projects.length
+  const resume = profile.resume ? { href: profile.resume, label: t.world.resume } : { href: '#experience', label: t.nav.experience }
+  const link = 'pointer-events-auto link text-fg'
 
   return (
     <div
@@ -216,26 +241,37 @@ export default function HeroWorld({ className = '' }) {
               key={project.slug}
               ref={(el) => (labelRefs.current[i] = el)}
               // Physical left/top: the position comes from the canvas, which doesn't mirror
-              className="pointer-events-none absolute top-0 left-0"
+              className={`pointer-events-none absolute top-0 left-0 ${here ? 'z-10' : ''}`}
             >
               <button
                 type="button"
-                onClick={() => (here ? openProject(project.slug) : worldRef.current?.goTo(i))}
+                data-landmark=""
+                onClick={() => (here ? open(i) : worldRef.current?.goTo(i))}
                 onFocus={(e) => e.currentTarget.matches(':focus-visible') && worldRef.current?.goTo(i)}
                 aria-label={here ? t.work.openProject(pad(i + 1), pick(project.title)) : t.work.goTo(pad(i + 1), pick(project.title))}
-                className={`pointer-events-auto flex -translate-x-1/2 -translate-y-full items-center gap-2 rounded-full border px-3 py-1.5 text-xs whitespace-nowrap shadow-sm backdrop-blur-sm transition-[background-color,color,border-color,scale] duration-300 ease-out ${
+                className={`pointer-events-auto block -translate-x-1/2 -translate-y-full border text-start shadow-sm backdrop-blur-sm transition-[background-color,border-color,border-radius,box-shadow] duration-300 ease-out ${
                   here
-                    ? 'scale-105 border-accent bg-accent text-on-accent'
-                    : 'border-line bg-ink/80 text-fg hover:border-fg/30'
+                    ? 'w-56 rounded-[10px] sm:w-64 border-accent/60 bg-surface/95 p-3.5 shadow-[0_18px_40px_-20px_rgb(40_25_10/0.5)]'
+                    : 'rounded-full border-line bg-ink/80 px-3 py-1.5 hover:border-fg/30'
                 }`}
               >
-                <span className="tabular-nums opacity-60" dir="ltr">
-                  {pad(i + 1)}
+                <span className="flex items-center gap-2 text-xs whitespace-nowrap text-fg">
+                  <span className="tabular-nums opacity-60" dir="ltr">
+                    {pad(i + 1)}
+                  </span>
+                  <span className={here ? 'font-medium' : ''}>{pick(project.title)}</span>
+                  {visited.has(i) && !here && (
+                    <span aria-hidden="true" className="text-accent">
+                      ✓
+                    </span>
+                  )}
                 </span>
-                {pick(project.title)}
                 {here && (
-                  <span aria-hidden="true" className="font-medium">
-                    {t.world.open} <span className="inline-block rtl:-scale-x-100">→</span>
+                  <span className="world-card block whitespace-normal">
+                    <span className="mt-1.5 block text-xs leading-relaxed text-muted">{pick(project.summary)}</span>
+                    <span aria-hidden="true" className="mt-2.5 inline-flex items-center gap-1.5 text-xs font-medium text-accent">
+                      {t.world.open} <span className="inline-block rtl:-scale-x-100">→</span>
+                    </span>
                   </span>
                 )}
               </button>
@@ -244,16 +280,50 @@ export default function HeroWorld({ className = '' }) {
         })}
       </ol>
 
-      <p
-        id="world-hint"
-        className={`pointer-events-none absolute inset-x-0 bottom-4 text-center text-xs text-muted transition-opacity delay-700 duration-700 lg:bottom-10 ${
+      <div
+        className={`pointer-events-none absolute inset-x-0 bottom-3 flex flex-col items-center gap-2 px-5 text-center text-xs text-muted transition-opacity delay-700 duration-700 lg:start-auto lg:bottom-8 lg:w-[60%] ${
           ready ? 'opacity-100' : 'opacity-0'
-        } lg:start-auto lg:w-[58%]`}
+        }`}
       >
-        {finePointer ? t.world.hintMouse : t.world.hintTouch}
-        <span className="mx-2 hidden opacity-50 group-focus-visible/world:inline">·</span>
-        <span className="hidden group-focus-visible/world:inline">{t.world.hintKeys}</span>
-      </p>
+        <p id="world-hint">
+          {done ? (
+            t.world.done
+          ) : (
+            <>
+              {finePointer ? t.world.hintMouse : t.world.hintTouch}
+              <span className="mx-2 hidden opacity-50 group-focus-visible/world:inline">·</span>
+              <span className="hidden group-focus-visible/world:inline">{t.world.hintKeys}</span>
+            </>
+          )}
+        </p>
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+          <span className="flex items-center gap-2">
+            <span aria-hidden="true" className="flex gap-1">
+              {projects.map((p, i) => (
+                <span key={p.slug} className={`size-1.5 rounded-full transition-colors duration-500 ${visited.has(i) ? 'bg-accent' : 'bg-line'}`} />
+              ))}
+            </span>
+            <span className="tabular-nums">{t.world.visited(visited.size, projects.length)}</span>
+          </span>
+          <a href="#work" className={link}>
+            {t.world.skip} <span aria-hidden="true">↓</span>
+          </a>
+        </div>
+        {visited.size > 0 && (
+          <p className="world-card flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+            <span>{done ? t.world.nextDone : t.world.next}</span>
+            <a href={profile.github} target="_blank" rel="noreferrer" className={link}>
+              GitHub <span aria-hidden="true" className="inline-block rtl:-scale-x-100">↗</span>
+            </a>
+            <a href={resume.href} className={link} {...(profile.resume ? { target: '_blank', rel: 'noreferrer' } : {})}>
+              {resume.label}
+            </a>
+            <a href="#contact" className={link}>
+              {t.nav.contact}
+            </a>
+          </p>
+        )}
+      </div>
 
       <p className="sr-only" aria-live="polite">
         {nearProject ? t.world.arrived(pick(nearProject.title)) : ''}
