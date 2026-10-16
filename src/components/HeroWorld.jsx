@@ -25,14 +25,16 @@ const themeColors = () => {
 
 // Which model stands for which project; a new project gets the workshop desk until it has its own
 const KIND = { 'saliba-polyclinic': 'clinic', iverse: 'shop', 'recipe-finder': 'kitchen', portfolio: 'workshop' }
-// One landmark per project, then the arcade that leads to the games
+// One island per project, then the home island's hangar (the games) and shack (about Georgio)
 const ARCADE = projects.length
+const ABOUT = projects.length + 1
 const SPECS = [
   ...projects.map((p) => ({ kind: KIND[p.slug] ?? 'workshop', tone: p.tone ?? '#e5e3dc' })),
-  { kind: 'arcade', tone: '#d9c7b8' },
+  { kind: 'hangar', tone: '#d9c7b8' },
+  { kind: 'shack', tone: '#c9a27e' },
 ]
 
-// The hero's island: roll a ball to a project's landmark and open it from there
+// The hero's archipelago: fly the plane to a project's island, land, and open it from there
 export default function HeroWorld({ className = '' }) {
   const { t, pick, dir } = useI18n()
   const [dark] = useTheme()
@@ -44,6 +46,8 @@ export default function HeroWorld({ className = '' }) {
   const labelRefs = useRef([])
   const worldRef = useRef(null)
   const nearRef = useRef(-1)
+  // The part of the canvas (in px) where labels may show
+  const boundsRef = useRef({ lo: 0, hi: Infinity, h: Infinity })
   const [ready, setReady] = useState(false)
   const [failed, setFailed] = useState(false)
   const [near, setNear] = useState(-1)
@@ -51,6 +55,8 @@ export default function HeroWorld({ className = '' }) {
   const [visited, setVisited] = useState(() => new Set())
 
   const open = (i) => {
+    // The shack's card holds its own links
+    if (i === ABOUT) return
     setVisited((v) => new Set(v).add(i))
     if (i === ARCADE) document.getElementById('play')?.scrollIntoView({ behavior: reduced ? 'instant' : 'smooth' })
     else openProject(projects[i].slug)
@@ -73,6 +79,7 @@ export default function HeroWorld({ className = '' }) {
           if (cancelled) return
           world = createWorld(canvasRef.current, {
             landmarks: SPECS,
+            start: ABOUT,
             reduced,
             onNear: (i) => {
               nearRef.current = i
@@ -80,11 +87,18 @@ export default function HeroWorld({ className = '' }) {
               if (i >= 0) setVisited((v) => (v.has(i) ? v : new Set(v).add(i)))
             },
             onPick: (i) => (nearRef.current === i ? openRef.current(i) : world.goTo(i)),
-            onFrame: (points) =>
+            onFrame: (points) => {
+              // Labels fade out where the world is masked away behind the headline, or off the canvas
+              const { lo, hi, h } = boundsRef.current
               points.forEach((p, i) => {
                 const el = labelRefs.current[i]
-                if (el) el.style.translate = `${p.x.toFixed(1)}px ${p.y.toFixed(1)}px`
-              }),
+                if (!el) return
+                el.style.translate = `${p.x.toFixed(1)}px ${p.y.toFixed(1)}px`
+                const shown = p.x > lo && p.x < hi && p.y > 30 && p.y < h - 20
+                el.style.opacity = shown ? '' : '0'
+                el.dataset.hidden = String(!shown)
+              })
+            },
           })
           worldRef.current = world
           setReady(true)
@@ -110,7 +124,16 @@ export default function HeroWorld({ className = '' }) {
   // On wide screens the island sits beside the headline, on the side away from the text
   useEffect(() => {
     if (!ready) return
-    worldRef.current.setFrame(wide ? { focusX: dir === 'rtl' ? 0.31 : 0.69, width: 0.54 } : { focusX: 0.5, width: 1 })
+    worldRef.current.setFrame(wide ? { focusX: dir === 'rtl' ? 0.31 : 0.69, width: 0.54 } : { focusX: 0.5, width: 1, view: 11 })
+    const measure = () => {
+      const w = wrapRef.current.clientWidth
+      const h = wrapRef.current.clientHeight
+      // On wide screens the headline covers one side; the canvas fades out there (.world-mask)
+      boundsRef.current = wide ? (dir === 'rtl' ? { lo: 0, hi: w * 0.6, h } : { lo: w * 0.4, hi: w, h }) : { lo: 0, hi: w, h }
+    }
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
   }, [ready, wide, dir])
 
   // Size, and only running while it's on screen and the tab is visible
@@ -138,7 +161,7 @@ export default function HeroWorld({ className = '' }) {
     }
   }, [ready])
 
-  // Pointer: a click or tap rolls the ball there; the camera leans toward the mouse
+  // Pointer: a click or tap on an island flies the plane there; the camera leans toward the mouse
   useEffect(() => {
     if (!ready) return
     const world = worldRef.current
@@ -180,7 +203,8 @@ export default function HeroWorld({ className = '' }) {
     }
   }, [ready, reduced])
 
-  // Keyboard: arrows or WASD roll the ball while the island has focus, Enter opens the landmark it's at
+  // Keyboard: arrows or WASD steer the plane (up is faster, down slower) while the world has focus.
+  // Enter opens the landmark the plane is parked at, or lands on the island it's flying over.
   const held = useRef(new Set())
   const applyKeys = () => {
     let x = 0
@@ -194,15 +218,16 @@ export default function HeroWorld({ className = '' }) {
   }
   const onKeyDown = (e) => {
     if (e.altKey || e.ctrlKey || e.metaKey) return
-    // Arrows drive the ball from the island itself or a landmark, not from the links underneath
+    // Arrows steer the plane from the world itself or a landmark, not from the links underneath
     const driving = e.target === wrapRef.current || e.target.dataset.landmark !== undefined
     if (KEYS[e.code] && driving) {
       e.preventDefault()
       held.current.add(e.code)
       applyKeys()
-    } else if (e.key === 'Enter' && e.target === wrapRef.current && nearRef.current >= 0) {
+    } else if (e.key === 'Enter' && e.target === wrapRef.current) {
       e.preventDefault()
-      open(nearRef.current)
+      if (nearRef.current >= 0) open(nearRef.current)
+      else worldRef.current?.land()
     }
   }
   const onKeyUp = (e) => {
@@ -216,7 +241,7 @@ export default function HeroWorld({ className = '' }) {
 
   if (failed) return null
 
-  const titleOf = (i) => (i === ARCADE ? t.world.arcade.title : pick(projects[i].title))
+  const titleOf = (i) => (i === ARCADE ? t.world.arcade.title : i === ABOUT ? t.world.about.label : pick(projects[i].title))
   const seen = [...visited].filter((i) => i < ARCADE).length
   const done = seen === projects.length
   const resume = profile.resume ? { href: profile.resume, label: t.world.resume } : { href: '#experience', label: t.nav.experience }
@@ -238,7 +263,7 @@ export default function HeroWorld({ className = '' }) {
       <canvas
         ref={canvasRef}
         aria-hidden="true"
-        className={`absolute inset-0 h-full w-full touch-pan-y transition-opacity duration-1000 ease-out ${ready ? 'opacity-100' : 'opacity-0'}`}
+        className={`world-mask absolute inset-0 h-full w-full touch-pan-y transition-opacity duration-1000 ease-out ${ready ? 'opacity-100' : 'opacity-0'}`}
       />
 
       {/* Labels float over the landmarks; they're real buttons, so Tab walks the island too */}
@@ -246,7 +271,36 @@ export default function HeroWorld({ className = '' }) {
         {SPECS.map((spec, i) => {
           const here = near === i
           const arcade = i === ARCADE
-          const label = arcade
+          const about = i === ABOUT
+          if (about && here) {
+            return (
+              <li key="about" ref={(el) => (labelRefs.current[i] = el)} className={`pointer-events-none absolute z-10 ${wide ? 'top-0 left-0' : 'world-docked inset-x-3 top-3'}`}>
+                <div
+                  role="region"
+                  aria-label={t.world.about.title}
+                  className={`world-card pointer-events-auto ${wide ? 'w-72 -translate-x-1/2 -translate-y-full' : 'w-full'} rounded-[10px] border border-accent/60 bg-surface/95 p-4 text-start shadow-[0_18px_40px_-20px_rgb(40_25_10/0.5)] backdrop-blur-sm`}
+                >
+                  <p className="font-display text-xl leading-tight text-fg">{t.world.about.title}</p>
+                  <p className="mt-2 text-xs leading-relaxed text-muted">{t.world.about.text}</p>
+                  <p className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs font-medium">
+                    <a href={resume.href} className="link text-fg" {...(profile.resume ? { target: '_blank', rel: 'noreferrer' } : {})}>
+                      {resume.label}
+                    </a>
+                    <a href="#contact" className="link text-fg">
+                      {t.nav.contact}
+                    </a>
+                    <a href="#work" className="link text-accent">
+                      {t.world.about.projects}
+                    </a>
+                  </p>
+                  <p className="mt-3 text-[0.7rem] text-muted">{finePointer ? t.world.about.hintMouse : t.world.about.hintTouch}</p>
+                </div>
+              </li>
+            )
+          }
+          const label = about
+            ? t.world.about.goTo
+            : arcade
             ? here
               ? t.world.arcade.play
               : t.world.arcade.goTo
@@ -255,10 +309,10 @@ export default function HeroWorld({ className = '' }) {
               : t.work.goTo(pad(i + 1), titleOf(i))
           return (
             <li
-              key={arcade ? 'arcade' : projects[i].slug}
+              key={about ? 'about' : arcade ? 'arcade' : projects[i].slug}
               ref={(el) => (labelRefs.current[i] = el)}
               // Physical left/top: the position comes from the canvas, which doesn't mirror
-              className={`pointer-events-none absolute top-0 left-0 ${here ? 'z-10' : ''}`}
+              className={`pointer-events-none absolute ${here && !wide ? 'world-docked inset-x-3 top-3 z-10' : `top-0 left-0 ${here ? 'z-10' : ''}`}`}
             >
               <button
                 type="button"
@@ -266,14 +320,14 @@ export default function HeroWorld({ className = '' }) {
                 onClick={() => (here ? open(i) : worldRef.current?.goTo(i))}
                 onFocus={(e) => e.currentTarget.matches(':focus-visible') && worldRef.current?.goTo(i)}
                 aria-label={label}
-                className={`pointer-events-auto block -translate-x-1/2 -translate-y-full border text-start shadow-sm backdrop-blur-sm transition-[background-color,border-color,border-radius,box-shadow] duration-300 ease-out ${
+                className={`pointer-events-auto block ${here && !wide ? 'w-full' : '-translate-x-1/2 -translate-y-full'} border text-start shadow-sm backdrop-blur-sm transition-[background-color,border-color,border-radius,box-shadow] duration-300 ease-out ${
                   here
-                    ? 'w-56 rounded-[10px] sm:w-64 border-accent/60 bg-surface/95 p-3.5 shadow-[0_18px_40px_-20px_rgb(40_25_10/0.5)]'
+                    ? 'rounded-[10px] lg:w-64 border-accent/60 bg-surface/95 p-3.5 shadow-[0_18px_40px_-20px_rgb(40_25_10/0.5)]'
                     : 'rounded-full border-line bg-ink/80 px-3 py-1.5 hover:border-fg/30'
                 }`}
               >
                 <span className="flex items-center gap-2 text-xs whitespace-nowrap text-fg">
-                  {!arcade && (
+                  {!arcade && !about && (
                     <span className="tabular-nums opacity-60" dir="ltr">
                       {pad(i + 1)}
                     </span>
@@ -347,7 +401,7 @@ export default function HeroWorld({ className = '' }) {
       </div>
 
       <p className="sr-only" aria-live="polite">
-        {near >= 0 ? (near === ARCADE ? t.world.arcade.arrived : t.world.arrived(titleOf(near))) : ''}
+        {near >= 0 ? (near === ARCADE ? t.world.arcade.arrived : near === ABOUT ? t.world.about.arrived : t.world.arrived(titleOf(near))) : ''}
       </p>
     </div>
   )

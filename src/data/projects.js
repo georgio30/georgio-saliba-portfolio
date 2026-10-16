@@ -365,14 +365,14 @@ export const projects = [
     year: '2026',
     type: { en: 'Personal site', fr: 'Site personnel', ar: 'موقع شخصي' },
     summary: {
-      en: 'The page you are on: a small 3D island to explore, and everything around it built by hand.',
-      fr: 'La page que vous lisez\u00a0: une petite île en 3D à explorer, et tout le reste fait main.',
-      ar: 'الصفحة التي تتصفّحها الآن: جزيرة صغيرة ثلاثية الأبعاد للاستكشاف، وكل ما حولها مصنوع يدويًا.',
+      en: 'The page you are on: a small 3D archipelago to fly around, and everything around it built by hand.',
+      fr: 'La page que vous lisez\u00a0: un petit archipel en 3D à survoler, et tout le reste fait main.',
+      ar: 'الصفحة التي تتصفّحها الآن: أرخبيل صغير ثلاثي الأبعاد للطيران فوقه، وكل ما حوله مصنوع يدويًا.',
     },
     description: {
-      en: 'A one-page portfolio built with React, Vite and Tailwind CSS. The hero is a three.js island with one landmark per project, loaded after first paint, with HTML labels so it works by keyboard and screen reader. The projects themselves are a plain list with a preview that follows the pointer.',
-      fr: 'Un portfolio d’une seule page construit avec React, Vite et Tailwind CSS. L’en-tête est une île three.js avec un repère par projet, chargée après le premier affichage, avec des étiquettes HTML pour le clavier et les lecteurs d’écran. Les projets eux-mêmes forment une simple liste, avec un aperçu qui suit le pointeur.',
-      ar: 'موقع شخصي من صفحة واحدة مبني بـ React وVite وTailwind CSS. الواجهة جزيرة three.js فيها معلم لكل مشروع، تُحمَّل بعد أول عرض، مع تسميات HTML لتعمل بلوحة المفاتيح وقارئ الشاشة. أما المشاريع نفسها فقائمة بسيطة مع معاينة تتبع المؤشر.',
+      en: 'A one-page portfolio built with React, Vite and Tailwind CSS. The hero is a three.js archipelago with one island per project and a plane to fly between them, loaded after first paint, with HTML labels so it works by keyboard and screen reader. The projects themselves are a plain list with a preview that follows the pointer.',
+      fr: 'Un portfolio d’une seule page construit avec React, Vite et Tailwind CSS. L’en-tête est un archipel three.js, une île par projet et un avion pour voler de l’une à l’autre, chargé après le premier affichage, avec des étiquettes HTML pour le clavier et les lecteurs d’écran. Les projets eux-mêmes forment une simple liste, avec un aperçu qui suit le pointeur.',
+      ar: 'موقع شخصي من صفحة واحدة مبني بـ React وVite وTailwind CSS. الواجهة أرخبيل three.js فيه جزيرة لكل مشروع وطائرة تطير بينها، يُحمَّل بعد أول عرض، مع تسميات HTML لتعمل بلوحة المفاتيح وقارئ الشاشة. أما المشاريع نفسها فقائمة بسيطة مع معاينة تتبع المؤشر.',
     },
     technologies: ['React', 'three.js', 'Vite', 'Tailwind CSS'],
     layers: [
@@ -450,9 +450,9 @@ export const projects = [
             ar: 'مشهد ثلاثي الأبعاد بأزرار حقيقية',
           },
           text: {
-            en: 'Each frame, every landmark’s position is projected from the 3D scene to the screen and written to an HTML button over it. React never re-renders while the ball rolls, and the labels stay focusable, translatable and readable by screen readers.',
-            fr: 'À chaque image, la position de chaque repère est projetée de la scène 3D vers l’écran et appliquée à un bouton HTML posé dessus. React ne refait aucun rendu pendant que la bille roule, et les étiquettes restent focalisables, traduisibles et lisibles par les lecteurs d’écran.',
-            ar: 'في كل إطار يُسقَط موضع كل معلم من المشهد ثلاثي الأبعاد إلى الشاشة ويُطبَّق على زر HTML فوقه. لا يعيد React العرض أثناء تدحرج الكرة، وتبقى التسميات قابلة للتركيز والترجمة والقراءة بقارئ الشاشة.',
+            en: 'Each frame, every landmark’s position is projected from the 3D scene to the screen and written to an HTML button over it. React never re-renders while the plane flies, and the labels stay focusable, translatable and readable by screen readers.',
+            fr: 'À chaque image, la position de chaque repère est projetée de la scène 3D vers l’écran et appliquée à un bouton HTML posé dessus. React ne refait aucun rendu pendant que l’avion vole, et les étiquettes restent focalisables, traduisibles et lisibles par les lecteurs d’écran.',
+            ar: 'في كل إطار يُسقَط موضع كل معلم من المشهد ثلاثي الأبعاد إلى الشاشة ويُطبَّق على زر HTML فوقه. لا يعيد React العرض أثناء طيران الطائرة، وتبقى التسميات قابلة للتركيز والترجمة والقراءة بقارئ الشاشة.',
           },
         },
         {
@@ -475,17 +475,17 @@ export const projects = [
       },
       approach: {
         en: [
-          'Made the projects something to explore, a three.js island loaded after first paint, while keeping a plain list for anyone who just wants to read.',
+          'Made the projects something to explore, a three.js archipelago loaded after first paint, while keeping a plain list for anyone who just wants to read.',
           'Built English, French and Arabic in from the start, including a true right-to-left layout.',
           'Treated accessibility and image weight as features: focus management, keyboard use, responsive WebP.',
         ],
         fr: [
-          'Fait des projets quelque chose à explorer, une île three.js chargée après le premier affichage, tout en gardant une simple liste pour qui veut juste lire.',
+          'Fait des projets quelque chose à explorer, un archipel three.js chargé après le premier affichage, tout en gardant une simple liste pour qui veut juste lire.',
           'Intégré dès le départ l’anglais, le français et l’arabe, avec une vraie mise en page de droite à gauche.',
           'Traité l’accessibilité et le poids des images comme des fonctionnalités : gestion du focus, clavier, WebP adaptatif.',
         ],
         ar: [
-          'جعلتُ المشاريع شيئًا يُستكشَف، جزيرة three.js تُحمَّل بعد أول عرض، مع إبقاء قائمة بسيطة لمن يريد القراءة فقط.',
+          'جعلتُ المشاريع شيئًا يُستكشَف، أرخبيل three.js يُحمَّل بعد أول عرض، مع إبقاء قائمة بسيطة لمن يريد القراءة فقط.',
           'بنيتُ الإنجليزية والفرنسية والعربية منذ البداية، بما في ذلك تخطيط حقيقي من اليمين إلى اليسار.',
           'عاملتُ سهولة الوصول ووزن الصور كميزات: إدارة التركيز، ولوحة المفاتيح، وWebP متجاوب.',
         ],

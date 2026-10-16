@@ -1,7 +1,7 @@
 // The island's small models: one landmark per kind of project, lamps, grass and clouds.
 // Everything is built from a few primitives, faces +z (the island turns each one toward the middle),
 // and sits on a pedestal whose top is at y = 0.
-import { BoxGeometry, ConeGeometry, CylinderGeometry, Group, IcosahedronGeometry, Mesh, PointLight, SphereGeometry } from 'three'
+import { BoxGeometry, ConeGeometry, CylinderGeometry, DoubleSide, Group, IcosahedronGeometry, Mesh, PointLight, SphereGeometry } from 'three'
 
 function part(geometry, mat, x = 0, y = 0, z = 0) {
   const m = new Mesh(geometry, mat)
@@ -142,40 +142,128 @@ function workshop(m, wall) {
   return { group: g, top: 1.05, update: () => {} }
 }
 
-// The arcade: a cabinet that leads to Snake and Minesweeper
-function arcade(m, wall) {
+// The shack on the home island: Georgio's place, with a porch light and a chimney
+function shack(m, wall) {
   const g = new Group()
-  g.add(box(0.5, 0.95, 0.44, m.dark, 0, 0.475, -0.02))
-  g.add(box(0.04, 0.95, 0.46, wall, -0.27, 0.475, -0.02))
-  g.add(box(0.04, 0.95, 0.46, wall, 0.27, 0.475, -0.02))
-  const screen = box(0.38, 0.3, 0.02, m.screen, 0, 0.72, 0.21)
-  screen.rotation.x = -0.22
-  g.add(screen)
-  const panel = box(0.5, 0.06, 0.22, m.roof, 0, 0.5, 0.28)
-  panel.rotation.x = 0.3
-  g.add(panel)
-  const stick = new Group()
-  stick.position.set(-0.11, 0.55, 0.29)
-  stick.add(cyl(0.012, 0.012, 0.09, 4, m.metal, 0, 0.045, 0))
-  stick.add(part(new SphereGeometry(0.03, 8, 6), m.accent, 0, 0.095, 0))
-  g.add(stick)
-  g.add(cyl(0.025, 0.025, 0.02, 8, m.accent, 0.06, 0.545, 0.3))
-  g.add(cyl(0.025, 0.025, 0.02, 8, m.window, 0.14, 0.545, 0.29))
-  g.add(box(0.5, 0.12, 0.1, m.window, 0, 0.98, 0.17))
+  g.add(box(0.9, 0.55, 0.7, wall, 0, 0.275, 0))
+  // A gable roof: a three-sided prism lying along x, apex up, then squashed to a gentle pitch
+  const roof = part(new CylinderGeometry(0.46, 0.46, 1.04, 3), m.roof)
+  roof.rotation.z = Math.PI / 2
+  roof.rotation.x = -Math.PI / 2
+  const roofTilt = new Group()
+  roofTilt.add(roof)
+  roofTilt.scale.y = 0.6
+  roofTilt.position.y = 0.55 + 0.23 * 0.6
+  g.add(roofTilt)
+  g.add(box(0.11, 0.3, 0.11, m.stone, -0.28, 0.9, -0.12))
+  g.add(box(0.2, 0.34, 0.03, m.wood, 0.12, 0.17, 0.36))
+  g.add(box(0.18, 0.15, 0.02, m.window, -0.24, 0.32, 0.355))
+  // Porch: boards, two posts and a lamp by the door
+  g.add(box(0.9, 0.04, 0.26, m.wood, 0, 0.02, 0.48))
+  g.add(cyl(0.02, 0.02, 0.4, 4, m.wood, -0.4, 0.2, 0.58))
+  g.add(cyl(0.02, 0.02, 0.4, 4, m.wood, 0.4, 0.2, 0.58))
+  g.add(box(0.94, 0.04, 0.3, m.roof, 0, 0.42, 0.5))
+  g.add(part(new SphereGeometry(0.035, 8, 6), m.window, 0.3, 0.36, 0.38))
+  // A bench and a mug on the porch
+  g.add(box(0.26, 0.04, 0.09, m.wood, -0.18, 0.13, 0.5))
+  g.add(cyl(0.025, 0.022, 0.04, 8, m.accent, -0.12, 0.17, 0.5))
+  return { group: g, top: 1.05, update: () => {} }
+}
+
+// The hangar: an arched shed that leads to the games
+function hangar(m, wall) {
+  const g = new Group()
+  const arch = part(new CylinderGeometry(0.55, 0.55, 1.1, 14, 1, true, -Math.PI / 2, Math.PI), wall, 0, 0, 0)
+  arch.rotation.x = -Math.PI / 2
+  arch.material.side = DoubleSide
+  g.add(arch)
+  g.add(box(1.1, 0.02, 1.1, m.path, 0, 0.01, 0))
+  // Back wall and a dark inside, so it reads as open at the front
+  const back = part(new CylinderGeometry(0.54, 0.54, 0.02, 14, 1, false, -Math.PI / 2, Math.PI), m.dark, 0, 0, -0.54)
+  back.rotation.x = -Math.PI / 2
+  g.add(back)
+  g.add(box(0.36, 0.08, 0.03, m.window, 0, 0.62, 0.56))
+  // A windsock on a pole beside it
+  const sock = new Group()
+  sock.position.set(0.72, 0, 0.25)
+  sock.add(cyl(0.015, 0.015, 0.7, 4, m.metal, 0, 0.35, 0))
+  const cone = part(new ConeGeometry(0.06, 0.26, 8, 1, true), m.accent, 0.13, 0.66, 0)
+  cone.rotation.z = Math.PI / 2
+  sock.add(cone)
+  g.add(sock)
   return {
     group: g,
-    top: 1.15,
-    update: (t, lift) => {
-      stick.rotation.z = Math.sin(t * 5) * 0.25 * lift
-      stick.rotation.x = Math.cos(t * 4) * 0.2 * lift
-    },
+    top: 0.75,
+    update: (t) => (cone.rotation.y = Math.sin(t * 1.7) * 0.35),
   }
 }
 
-const KINDS = { clinic, shop, kitchen, workshop, arcade }
+const KINDS = { clinic, shop, kitchen, workshop, shack, hangar }
 
 export function buildLandmark(kind, m, wall) {
   return (KINDS[kind] ?? workshop)(m, wall)
+}
+
+// A small propeller plane, nose along +z, wheels touching y = 0
+export function buildPlane(m, body, scale = 1) {
+  const g = new Group()
+  const inner = new Group()
+  inner.scale.setScalar(scale)
+  g.add(inner)
+  const fuselage = part(new CylinderGeometry(0.11, 0.07, 0.9, 8), body, 0, 0.26, 0)
+  fuselage.rotation.x = Math.PI / 2
+  inner.add(fuselage)
+  const nose = part(new ConeGeometry(0.11, 0.14, 8), m.dark, 0, 0.26, 0.52)
+  nose.rotation.x = Math.PI / 2
+  inner.add(nose)
+  inner.add(box(1.15, 0.035, 0.24, m.cloth, 0, 0.3, 0.08))
+  inner.add(box(0.42, 0.03, 0.14, m.cloth, 0, 0.29, -0.4))
+  inner.add(box(0.03, 0.2, 0.16, body, 0, 0.38, -0.4))
+  inner.add(box(0.12, 0.08, 0.16, m.screen, 0, 0.36, 0.14))
+  // Landing gear
+  inner.add(cyl(0.012, 0.012, 0.16, 4, m.metal, -0.14, 0.12, 0.14))
+  inner.add(cyl(0.012, 0.012, 0.16, 4, m.metal, 0.14, 0.12, 0.14))
+  for (const x of [-0.14, 0.14]) {
+    const wheel = cyl(0.045, 0.045, 0.03, 10, m.dark, x, 0.045, 0.14)
+    wheel.rotation.z = Math.PI / 2
+    inner.add(wheel)
+  }
+  const tail = cyl(0.025, 0.025, 0.03, 8, m.dark, 0, 0.12, -0.4)
+  tail.rotation.z = Math.PI / 2
+  inner.add(tail)
+  // Propeller: two blades on a hub, spun by the scene
+  const prop = new Group()
+  prop.position.set(0, 0.26, 0.6)
+  prop.add(box(0.04, 0.42, 0.015, m.dark))
+  prop.add(box(0.42, 0.04, 0.015, m.dark))
+  prop.add(part(new SphereGeometry(0.03, 8, 6), m.metal))
+  inner.add(prop)
+  return { group: g, prop }
+}
+
+// The cozy garden in front of the shack: two flower beds and a round tree
+export function buildGarden(m, random) {
+  const g = new Group()
+  const flowers = [m.accent, m.cloth, m.window, m.roof]
+  for (const [bx, bz, w, d] of [
+    [-0.55, 0.15, 0.7, 0.32],
+    [0.6, 0.2, 0.55, 0.32],
+  ]) {
+    g.add(box(w, 0.08, d, m.soil, bx, 0.04, bz))
+    for (let i = 0; i < 9; i++) {
+      const fx = bx + (random() - 0.5) * (w - 0.1)
+      const fz = bz + (random() - 0.5) * (d - 0.08)
+      g.add(cyl(0.008, 0.008, 0.1, 3, m.tree, fx, 0.13, fz))
+      const bloom = part(new IcosahedronGeometry(0.035, 0), flowers[i % flowers.length], fx, 0.19, fz)
+      bloom.castShadow = false
+      g.add(bloom)
+    }
+  }
+  // A round-crowned tree
+  const crown = part(new IcosahedronGeometry(0.42, 1), m.tree, 1.25, 0.95, -0.25)
+  g.add(crown)
+  g.add(cyl(0.06, 0.08, 0.6, 6, m.trunk, 1.25, 0.3, -0.25))
+  return g
 }
 
 // A lamp post; its light only switches on at night
