@@ -317,16 +317,6 @@ body {
   pointer-events: none;
 }
 
-/* On phones an open card is docked at the top of the world, wherever its landmark is */
-.world-docked {
-  translate: none !important;
-  opacity: 1 !important;
-}
-
-.world-docked > * {
-  pointer-events: auto !important;
-}
-
 /* Beside the headline the archipelago fades out toward the text, so islands never sit behind the words */
 @media (min-width: 1024px) {
   .world-mask {

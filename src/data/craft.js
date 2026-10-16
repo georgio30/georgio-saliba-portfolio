@@ -14,9 +14,9 @@ export const craftPoints = [
     id: 'responsive',
     title: { en: 'Responsive design', fr: 'Design responsive', ar: 'التصميم المتجاوب' },
     text: {
-      en: 'Mobile-first layouts in Tailwind. On phones the island moves under the headline and answers to taps, and the project list turns into cards that switch to a portrait screenshot when a project has one.',
-      fr: 'Des mises en page pensées d’abord pour le mobile, avec Tailwind. Sur téléphone, l’île passe sous le titre et répond au toucher, et la liste des projets devient des cartes qui passent à une capture portrait quand le projet en a une.',
-      ar: 'تخطيطات تبدأ من الهاتف باستخدام Tailwind. على الهواتف تنتقل الجزيرة تحت العنوان وتستجيب للمس، وتتحول قائمة المشاريع إلى بطاقات تعرض لقطة هاتف طولية إن وُجدت للمشروع.',
+      en: 'Mobile-first layouts in Tailwind. The 3D archipelago is only loaded on desktops with a mouse; phones, tablets and touch screens get the plain headline and never download it. On phones the project list turns into cards that switch to a portrait screenshot when a project has one.',
+      fr: 'Des mises en page pensées d’abord pour le mobile, avec Tailwind. L’archipel 3D n’est chargé que sur ordinateur avec une souris ; téléphones, tablettes et écrans tactiles gardent le titre simple et ne le téléchargent jamais. Sur téléphone, la liste des projets devient des cartes qui passent à une capture portrait quand le projet en a une.',
+      ar: 'تخطيطات تبدأ من الهاتف باستخدام Tailwind. لا يُحمَّل الأرخبيل ثلاثي الأبعاد إلا على أجهزة الكمبيوتر المزوّدة بفأرة؛ أما الهواتف والأجهزة اللوحية والشاشات اللمسية فتعرض العنوان البسيط ولا تنزّله أبدًا. وعلى الهواتف تتحول قائمة المشاريع إلى بطاقات تعرض لقطة هاتف طولية إن وُجدت للمشروع.',
     },
   },
   {
