@@ -273,7 +273,9 @@ export default function HeroWorld({ className = '' }) {
       onKeyDown={onKeyDown}
       onKeyUp={onKeyUp}
       onBlur={release}
-      className={`group/world focus-visible:rounded-[10px] focus-visible:outline-offset-[-10px] ${className}`}
+      // No focus ring: it would frame the whole first screen and cut through the headline's buttons.
+      // Focus shows in the keyboard hint under the world instead.
+      className={`group/world focus-visible:outline-none ${className}`}
     >
       <canvas
         ref={canvasRef}
