@@ -1,7 +1,10 @@
 // The hero's little world: a floating island with one landmark per project and a ball you roll between them.
 // Plain three.js with no React, loaded on its own after the page has painted (see HeroWorld.jsx).
+// The landmark models, lamps and clouds live in world-props.js.
 import {
-  BoxGeometry,
+  AdditiveBlending,
+  BufferAttribute,
+  BufferGeometry,
   CircleGeometry,
   Color,
   ConeGeometry,
@@ -11,30 +14,42 @@ import {
   Group,
   HemisphereLight,
   IcosahedronGeometry,
+  InstancedMesh,
   Mesh,
   MeshBasicMaterial,
   MeshStandardMaterial,
-  OctahedronGeometry,
+  Object3D,
   PCFSoftShadowMap,
   PerspectiveCamera,
   Plane,
+  Points,
+  PointsMaterial,
   Quaternion,
   Raycaster,
   Scene,
   TorusGeometry,
-  TorusKnotGeometry,
   Vector2,
   Vector3,
   WebGLRenderer,
 } from 'three'
+import { buildCloud, buildLamp, buildLandmark } from './world-props'
 
 const ISLAND = 6.2 // radius of the island's flat top
 const RING = 3.75 // how far from the middle the landmarks stand
 const PAD = 0.85 // radius of a landmark's pedestal
+const PAD_TOP = 0.24
+const MODEL_SCALE = 1.3 // the models are built at a desk-toy scale; this sizes them to their pedestals
 const BALL = 0.42 // radius of the ball
 const NEAR = PAD + BALL + 0.75 // close enough to "arrive" at a landmark
+const PLAZA = 0.95 // the paved circle in the middle
 const MAX_SPEED = 5.2
 const FOV = 30
+
+// Natural colours the theme's neutrals are tinted toward, by day and by night
+const NATURE = {
+  day: { grass: '#b9c49f', tree: '#7d9169', path: '#d8cdb8', sky: 0xfff3e2, ground: 0x8a8478, sun: 0xfff1dd, cloud: '#ffffff' },
+  night: { grass: '#3a4636', tree: '#2c3a2c', path: '#4a4640', sky: 0x8796c4, ground: 0x15171d, sun: 0xa9b6ff, cloud: '#5d6580' },
+}
 
 // Small seeded random, so the trees grow in the same places on every visit
 function seeded(seed) {
@@ -43,17 +58,16 @@ function seeded(seed) {
 
 const smooth = (dt, ms) => 1 - Math.exp(-dt / ms)
 
-// Each project gets its own landmark shape, in data order
-const SHAPES = [
-  () => new BoxGeometry(0.62, 1.25, 0.62),
-  () => new IcosahedronGeometry(0.58, 0),
-  () => new TorusKnotGeometry(0.34, 0.12, 64, 8),
-  () => new OctahedronGeometry(0.62, 0),
-  () => new DodecahedronGeometry(0.55, 0),
-  () => new ConeGeometry(0.55, 1.2, 6),
-]
+// Distance from (x, z) to the straight path between the middle and a landmark
+function pathOffset(x, z, l) {
+  const len = Math.hypot(l.x, l.z)
+  const along = (x * l.x + z * l.z) / len
+  const off = Math.abs(x * l.z - z * l.x) / len
+  return along < 0 || along > len ? Infinity : off
+}
 
-export function createWorld(canvas, { count, tones, reduced = false, onFrame, onNear, onPick }) {
+// `landmarks`: [{ kind, tone }], one per landmark, the first one at the front
+export function createWorld(canvas, { landmarks: specs, reduced = false, onFrame, onNear, onPick }) {
   const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'low-power' })
   renderer.setClearColor(0x000000, 0)
   renderer.shadowMap.enabled = true
@@ -71,11 +85,35 @@ export function createWorld(canvas, { count, tones, reduced = false, onFrame, on
   sun.shadow.bias = -0.0006
   scene.add(hemi, sun)
 
-  const flat = () => new MeshStandardMaterial({ roughness: 0.92, metalness: 0, flatShading: true })
-  const mats = { top: flat(), side: flat(), rock: flat(), pad: flat(), tree: flat(), trunk: flat(), ball: flat(), band: flat() }
+  const flat = (extra) => new MeshStandardMaterial({ roughness: 0.92, metalness: 0, flatShading: true, ...extra })
+  const mats = {
+    top: flat(),
+    side: flat(),
+    rock: flat(),
+    pad: flat(),
+    tree: flat(),
+    trunk: flat(),
+    ball: flat(),
+    band: flat(),
+    grass: flat(),
+    path: flat(),
+    // Shared by the landmarks
+    roof: flat(),
+    dark: flat(),
+    accent: flat(),
+    wood: flat(),
+    cloth: flat(),
+    metal: flat({ roughness: 0.6, metalness: 0.2 }),
+    stone: flat(),
+    steam: flat({ transparent: true, opacity: 0.75 }),
+    cloud: flat({ transparent: true, opacity: 0.92 }),
+    // Windows, bulbs and screens: lit from inside, much brighter at night
+    window: flat({ emissive: new Color('#ffcf8a') }),
+    screen: flat({ emissive: new Color('#9fd3ff') }),
+  }
   const glow = new MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
   const marker = new MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
-  const toneMats = tones.map(() => flat())
+  const wallMats = specs.map(() => flat())
 
   // The island: a flat top over a faceted rock that tapers to a point
   const island = new Group()
@@ -87,6 +125,12 @@ export function createWorld(canvas, { count, tones, reduced = false, onFrame, on
   rock.position.y = -0.5 - 1.7
   island.add(top, rock)
   scene.add(island)
+
+  // The paved plaza in the middle, where the ball starts
+  const plaza = new Mesh(new CylinderGeometry(PLAZA, PLAZA, 0.02, 32), mats.path)
+  plaza.position.y = 0.01
+  plaza.receiveShadow = true
+  scene.add(plaza)
 
   // A few pebbles floating under the island
   const random = seeded(7)
@@ -100,63 +144,105 @@ export function createWorld(canvas, { count, tones, reduced = false, onFrame, on
     scene.add(m)
   }
 
-  // Landmarks, evenly around the ring, the first one at the front
+  // Landmarks, evenly around the ring, each turned to face the middle
   const pickables = []
   const colliders = []
-  const landmarks = Array.from({ length: count }, (_, i) => {
+  const count = specs.length
+  const landmarks = specs.map((spec, i) => {
     const a = Math.PI / 2 - (i / count) * Math.PI * 2
     const x = Math.cos(a) * RING
     const z = Math.sin(a) * RING
     const group = new Group()
     group.position.set(x, 0, z)
+    group.lookAt(0, 0, 0)
 
-    const pad = new Mesh(new CylinderGeometry(PAD, PAD + 0.08, 0.24, 24), mats.pad)
-    pad.position.y = 0.12
+    const pad = new Mesh(new CylinderGeometry(PAD, PAD + 0.08, PAD_TOP, 24), mats.pad)
+    pad.position.y = PAD_TOP / 2
     pad.castShadow = pad.receiveShadow = true
-    const shape = new Mesh(SHAPES[i % SHAPES.length](), toneMats[i])
-    shape.castShadow = true
-    const base = 0.24 + 0.85
-    shape.position.y = base
+    const model = buildLandmark(spec.kind, mats, wallMats[i])
+    model.group.position.y = PAD_TOP
+    model.group.scale.setScalar(MODEL_SCALE)
     const ring = new Mesh(new TorusGeometry(PAD + 0.28, 0.035, 6, 48), glow)
     ring.rotation.x = Math.PI / 2
     ring.position.y = 0.02
-    group.add(pad, shape, ring)
+    group.add(pad, model.group, ring)
     scene.add(group)
 
-    pad.userData.project = shape.userData.project = i
-    pickables.push(pad, shape)
+    pad.userData.project = i
+    pickables.push(pad)
+    model.group.traverse((o) => {
+      if (!o.isMesh) return
+      o.userData.project = i
+      pickables.push(o)
+    })
     colliders.push({ x, z, r: PAD + 0.04 })
-    return { group, shape, ring, base, x, z, a, lift: 0, glow: 0 }
+    return { group, model, ring, x, z, a, lift: 0, glow: 0, labelY: PAD_TOP + model.top * MODEL_SCALE + 0.35 }
   })
 
-  // Trees and rocks, kept clear of the landmarks and of the middle where the ball starts
+  // Stepping stones from the plaza to each landmark
+  const stoneGeo = new CylinderGeometry(0.17, 0.18, 0.03, 7)
+  const stoneSpots = []
+  landmarks.forEach((l) => {
+    const len = Math.hypot(l.x, l.z)
+    const ux = l.x / len
+    const uz = l.z / len
+    for (let d = PLAZA + 0.25; d < len - PAD - 0.15; d += 0.42) {
+      const side = (random() - 0.5) * 0.14
+      stoneSpots.push([ux * d - uz * side, uz * d + ux * side, random() * Math.PI])
+    }
+  })
+  const stones = new InstancedMesh(stoneGeo, mats.path, stoneSpots.length)
+  const placer = new Object3D()
+  stoneSpots.forEach(([x, z, r], i) => {
+    placer.position.set(x, 0.015, z)
+    placer.rotation.set(0, r, 0)
+    placer.updateMatrix()
+    stones.setMatrixAt(i, placer.matrix)
+  })
+  stones.receiveShadow = true
+  scene.add(stones)
+
+  // A lamp beside each path, halfway along
+  const lamps = landmarks.map((l) => {
+    const len = Math.hypot(l.x, l.z)
+    const d = (PLAZA + len - PAD) / 2
+    const ux = l.x / len
+    const uz = l.z / len
+    const lamp = buildLamp(mats)
+    // Far enough to the side that the ball rolls past without touching it
+    const x = ux * d + uz * 0.78
+    const z = uz * d - ux * 0.78
+    lamp.group.position.set(x, 0, z)
+    scene.add(lamp.group)
+    colliders.push({ x, z, r: 0.08 })
+    return lamp
+  })
+
+  const clear = (x, z, room) =>
+    Math.hypot(x, z) > PLAZA + room &&
+    landmarks.every((l) => Math.hypot(l.x - x, l.z - z) > PAD + room + 0.2 && pathOffset(x, z, l) > room + 0.25) &&
+    colliders.every((c) => Math.hypot(c.x - x, c.z - z) > c.r + room)
+
+  // Trees and rocks, kept clear of the landmarks, the paths and the plaza
   const trees = []
-  for (let tries = 0; trees.length < 15 && tries < 400; tries++) {
+  for (let tries = 0; trees.length < 16 && tries < 500; tries++) {
     const a = random() * Math.PI * 2
     const d = 1.6 + random() * (ISLAND - 2.2)
     const x = Math.cos(a) * d
     const z = Math.sin(a) * d
-    const clear =
-      landmarks.every((l) => Math.hypot(l.x - x, l.z - z) > PAD + 1.5) &&
-      trees.every((t) => Math.hypot(t.x - x, t.z - z) > 1) &&
-      // Leave a path from the middle to each landmark
-      landmarks.every((l) => {
-        const len = Math.hypot(l.x, l.z)
-        const along = (x * l.x + z * l.z) / len
-        const off = Math.abs(x * l.z - z * l.x) / len
-        return along < 0 || along > len || off > 0.95
-      })
-    if (!clear) continue
+    if (!clear(x, z, 0.6)) continue
     const scale = 0.7 + random() * 0.6
     const group = new Group()
     group.position.set(x, 0, z)
     if (random() < 0.75) {
       const crown = new Mesh(new ConeGeometry(0.38, 1, 6), mats.tree)
       crown.position.y = 0.85
+      const crown2 = new Mesh(new ConeGeometry(0.3, 0.7, 6), mats.tree)
+      crown2.position.y = 1.2
       const trunk = new Mesh(new CylinderGeometry(0.07, 0.09, 0.4, 5), mats.trunk)
       trunk.position.y = 0.2
-      crown.castShadow = trunk.castShadow = true
-      group.add(crown, trunk)
+      crown.castShadow = crown2.castShadow = trunk.castShadow = true
+      group.add(crown, crown2, trunk)
     } else {
       const stone = new Mesh(new DodecahedronGeometry(0.3, 0), mats.rock)
       stone.position.y = 0.18
@@ -170,6 +256,52 @@ export function createWorld(canvas, { count, tones, reduced = false, onFrame, on
     trees.push(tree)
     colliders.push(tree)
   }
+
+  // Grass: little tufts of three blades, all one instanced mesh
+  const bladeGeo = new ConeGeometry(0.035, 0.2, 4)
+  bladeGeo.translate(0, 0.1, 0)
+  const blades = []
+  for (let tries = 0; blades.length < 210 && tries < 900; tries++) {
+    const a = random() * Math.PI * 2
+    const d = Math.sqrt(random()) * (ISLAND - 0.35)
+    const x = Math.cos(a) * d
+    const z = Math.sin(a) * d
+    if (!clear(x, z, 0.12)) continue
+    for (let b = 0; b < 3; b++) blades.push([x + (random() - 0.5) * 0.08, z + (random() - 0.5) * 0.08, (random() - 0.5) * 0.5, 0.7 + random() * 0.6])
+  }
+  const grass = new InstancedMesh(bladeGeo, mats.grass, blades.length)
+  blades.forEach(([x, z, tilt, s], i) => {
+    placer.position.set(x, 0, z)
+    placer.rotation.set(tilt * 0.6, random() * Math.PI, tilt)
+    placer.scale.set(1, s, 1)
+    placer.updateMatrix()
+    grass.setMatrixAt(i, placer.matrix)
+  })
+  scene.add(grass)
+
+  // Clouds drifting slowly around the island
+  const clouds = Array.from({ length: 3 }, (_, i) => {
+    const c = buildCloud(mats, random)
+    // Behind the island (the camera looks from +z), swaying a little instead of circling into view
+    c.userData = { a: -Math.PI / 2 + (i - 1) * 0.85, r: ISLAND + 0.7 + random() * 0.8, y: 1.5 + random() * 0.9, speed: 0.12 + random() * 0.08 }
+    scene.add(c)
+    return c
+  })
+
+  // Fireflies, only out at night
+  const flyCount = 26
+  const flyHome = new Float32Array(flyCount * 3)
+  for (let i = 0; i < flyCount; i++) {
+    const a = random() * Math.PI * 2
+    const d = 1.2 + random() * (ISLAND - 1.6)
+    flyHome.set([Math.cos(a) * d, 0.3 + random() * 1.2, Math.sin(a) * d], i * 3)
+  }
+  const flyGeo = new BufferGeometry()
+  flyGeo.setAttribute('position', new BufferAttribute(flyHome.slice(), 3))
+  const flyMat = new PointsMaterial({ color: 0xffd98a, size: 0.09, transparent: true, opacity: 0.9, depthWrite: false, blending: AdditiveBlending })
+  const fireflies = new Points(flyGeo, flyMat)
+  fireflies.visible = false
+  scene.add(fireflies)
 
   // The ball, with a band so you can see it roll
   const ball = new Group()
@@ -185,7 +317,7 @@ export function createWorld(canvas, { count, tones, reduced = false, onFrame, on
   // Where a click or tap sent the ball
   const ping = new Mesh(new CircleGeometry(0.3, 32), marker)
   ping.rotation.x = -Math.PI / 2
-  ping.position.y = 0.015
+  ping.position.y = 0.03
   scene.add(ping)
 
   // State
@@ -197,10 +329,14 @@ export function createWorld(canvas, { count, tones, reduced = false, onFrame, on
   let near = -1
   let hover = -1
   let pingT = 1
+  let night = false
+  // 0..1: how far the camera has eased in toward the landmark the ball is resting at
+  let arrive = 0
   let frame = { focusX: 0.5, width: 1 }
   let size = { w: 1, h: 1 }
   let pointer = { x: 0, y: 0, tx: 0, ty: 0 }
   const look = new Vector3()
+  const lookAt = new Vector3()
   const camPos = new Vector3()
   let running = false
   let raf = 0
@@ -241,23 +377,48 @@ export function createWorld(canvas, { count, tones, reduced = false, onFrame, on
     resize(size.w, size.h, renderer.getPixelRatio())
   }
 
+  // Light mode is a sunny afternoon; dark mode is night, with the lamps and windows lit
   function setTheme(c, dark) {
+    night = dark
+    const n = dark ? NATURE.night : NATURE.day
     const col = (v) => new Color(v)
-    mats.top.color.copy(col(c.surface).lerp(col(c.line), dark ? 0.15 : 0.45))
+    mats.top.color.copy(col(c.surface).lerp(col(n.grass), dark ? 0.55 : 0.42))
+    mats.grass.color.copy(col(n.grass).lerp(col(c.fg), dark ? 0.04 : 0.12))
     mats.side.color.copy(col(c.line).lerp(col(c.fg), dark ? 0.06 : 0.14))
     mats.rock.color.copy(col(c.line).lerp(col(c.fg), dark ? 0.12 : 0.22))
     mats.pad.color.copy(col(c.surface).lerp(col(c.fg), dark ? 0.08 : 0.05))
-    mats.tree.color.copy(col(c.muted).lerp(col(c.line), dark ? 0.35 : 0.25))
+    mats.path.color.copy(col(n.path))
+    mats.stone.color.copy(col(n.path).lerp(col(c.fg), 0.25))
+    mats.tree.color.copy(col(n.tree))
     mats.trunk.color.copy(col(c.muted).lerp(col(c.fg), 0.3))
     mats.ball.color.copy(col(c.accent))
     mats.band.color.copy(col(c.fg).lerp(col(c.accent), 0.2))
+    mats.roof.color.copy(col(c.fg).lerp(col(c.accent), 0.25).lerp(col(c.surface), dark ? 0.55 : 0.25))
+    mats.dark.color.copy(col(dark ? '#2a2724' : '#3a3632'))
+    mats.accent.color.copy(col(c.accent))
+    mats.wood.color.copy(col(dark ? '#5a4a3c' : '#9a7b5c'))
+    mats.cloth.color.copy(col(dark ? '#c9c2b8' : '#fbf8f2'))
+    mats.metal.color.copy(col(dark ? '#7d7b78' : '#a9a6a0'))
+    mats.steam.color.copy(col(dark ? '#8a8f99' : '#ffffff'))
+    mats.cloud.color.copy(col(n.cloud))
+    mats.cloud.opacity = dark ? 0.55 : 0.92
+    mats.window.color.copy(col(dark ? '#3d3427' : '#efe6d4'))
+    mats.window.emissiveIntensity = dark ? 1.6 : 0.12
+    mats.screen.color.copy(col(dark ? '#1d2a33' : '#cfe3ef'))
+    mats.screen.emissiveIntensity = dark ? 1.3 : 0.25
     glow.color.copy(col(c.accent))
     marker.color.copy(col(c.accent))
-    toneMats.forEach((m, i) => m.color.copy(dark ? col(tones[i]).lerp(col(c.accent), 0.12).multiplyScalar(0.82) : col(tones[i]).lerp(col(c.fg), 0.06)))
-    hemi.color.set(dark ? 0xd8d2c8 : 0xffffff)
-    hemi.groundColor.set(dark ? 0x2a2622 : 0x8a8478)
-    hemi.intensity = dark ? 1.15 : 1.6
-    sun.intensity = dark ? 1.7 : 2.1
+    wallMats.forEach((m, i) => m.color.copy(dark ? col(specs[i].tone).multiplyScalar(0.55) : col(specs[i].tone).lerp(col(c.fg), 0.04)))
+    hemi.color.set(n.sky)
+    hemi.groundColor.set(n.ground)
+    hemi.intensity = dark ? 1.25 : 1.6
+    sun.color.set(n.sun)
+    sun.intensity = dark ? 1.05 : 2.1
+    lamps.forEach((l) => {
+      l.light.intensity = dark ? 2.6 : 0
+      l.light.visible = dark
+    })
+    fireflies.visible = dark && !reduced
     dirty = true
   }
 
@@ -273,7 +434,7 @@ export function createWorld(canvas, { count, tones, reduced = false, onFrame, on
   function sendTo(point, showPing = true) {
     target = point
     if (showPing) {
-      ping.position.set(point.x, 0.015, point.y)
+      ping.position.set(point.x, 0.03, point.y)
       pingT = 0
     }
     if (reduced) {
@@ -411,26 +572,61 @@ export function createWorld(canvas, { count, tones, reduced = false, onFrame, on
     return moved > 1e-5
   }
 
+  const liftFor = (i) => (i === near ? 1 : i === hover ? 0.45 : 0)
+  // The camera only leans in once the ball has come to rest at a landmark, not while it rolls past
+  const arriveFor = () => (near >= 0 && !reduced && vel.length() < 0.5 && input.lengthSq() === 0 ? 1 : 0)
+
   function animate(dt) {
     clock += dt / 1000
+    const t = reduced ? 0 : clock
     const k = smooth(dt, 140)
+    let ringGlow = 0
     landmarks.forEach((l, i) => {
-      const on = i === near ? 1 : i === hover ? 0.45 : 0
-      l.lift += (on - l.lift) * k
-      l.glow += (on - l.glow) * k
-      l.shape.position.y = l.base + l.lift * 0.35 + (reduced ? 0 : Math.sin(clock * 1.4 + i) * 0.06)
-      if (!reduced) l.shape.rotation.y += dt * 0.0004 * (1 + l.lift * 2.5)
-      l.ring.material.opacity = Math.max(...landmarks.map((m) => m.glow)) * 0.9
+      l.lift += (liftFor(i) - l.lift) * k
+      l.glow += (liftFor(i) - l.glow) * k
+      ringGlow = Math.max(ringGlow, l.glow)
+      const g = l.model.group
+      g.position.y = PAD_TOP + l.lift * 0.08 + (reduced ? 0 : Math.sin(clock * 1.4 + i) * 0.015)
+      g.scale.setScalar(MODEL_SCALE * (1 + l.lift * 0.06))
+      l.model.update(t, l.lift)
       l.ring.visible = l.glow > 0.02
       l.ring.scale.setScalar(1 + (1 - l.glow) * 0.25)
     })
-    trees.forEach((t) => {
-      t.wobbleV += -t.wobble * 120 * (dt / 1000)
-      t.wobbleV *= Math.exp((-dt / 1000) * 5)
-      t.wobble += t.wobbleV * (dt / 1000)
-      t.group.quaternion.setFromAxisAngle(t.axis, t.wobble * 0.25)
+    glow.opacity = ringGlow * 0.9
+    trees.forEach((tr) => {
+      tr.wobbleV += -tr.wobble * 120 * (dt / 1000)
+      tr.wobbleV *= Math.exp((-dt / 1000) * 5)
+      tr.wobble += tr.wobbleV * (dt / 1000)
+      tr.group.quaternion.setFromAxisAngle(tr.axis, tr.wobble * 0.25)
     })
-    if (!reduced) floaters.forEach((f) => (f.position.y += Math.sin(clock * 0.9 + f.userData.phase) * 0.0015))
+    if (!reduced) {
+      floaters.forEach((f) => (f.position.y += Math.sin(clock * 0.9 + f.userData.phase) * 0.0015))
+      clouds.forEach((c) => {
+        const { a, r, y, speed } = c.userData
+        const angle = a + Math.sin(clock * speed + a) * 0.22
+        c.position.set(Math.cos(angle) * r, y + Math.sin(clock * 0.3 + a) * 0.1, Math.sin(angle) * r)
+        c.rotation.y = -angle
+      })
+      if (fireflies.visible) {
+        const p = flyGeo.attributes.position
+        for (let i = 0; i < flyCount; i++) {
+          p.setXYZ(
+            i,
+            flyHome[i * 3] + Math.sin(clock * 0.7 + i) * 0.35,
+            flyHome[i * 3 + 1] + Math.sin(clock * 1.3 + i * 2) * 0.18,
+            flyHome[i * 3 + 2] + Math.cos(clock * 0.6 + i * 1.7) * 0.35,
+          )
+        }
+        p.needsUpdate = true
+        flyMat.opacity = 0.55 + Math.sin(clock * 3) * 0.3
+      }
+    } else if (!clouds[0].userData.placed) {
+      clouds.forEach((c) => {
+        const { a, r, y } = c.userData
+        c.position.set(Math.cos(a) * r, y, Math.sin(a) * r)
+        c.userData.placed = true
+      })
+    }
 
     if (pingT < 1) {
       pingT = Math.min(1, pingT + dt / 650)
@@ -438,12 +634,18 @@ export function createWorld(canvas, { count, tones, reduced = false, onFrame, on
       marker.opacity = (1 - pingT) * 0.7
     }
 
-    // Camera: drifts a little after the ball and leans toward the pointer
+    // Camera: drifts a little after the ball, leans toward the pointer,
+    // and eases in toward a landmark once the ball rests there
     pointer.x += (pointer.tx - pointer.x) * smooth(dt, 220)
     pointer.y += (pointer.ty - pointer.y) * smooth(dt, 220)
-    const dist = cameraDistance()
+    arrive += (arriveFor() - arrive) * smooth(dt, 420)
+    const l = landmarks[near]
+    const dist = cameraDistance() * (1 - 0.14 * arrive)
     const follow = reduced ? 0 : 0.22
-    look.set(pos.x * follow, 0.2, pos.y * follow - 0.6)
+    lookAt.set(pos.x * follow, 0.2, pos.y * follow - 0.6)
+    if (l) lookAt.lerp(tmp.set(l.x * 0.85, 0.5, l.z * 0.85 - 0.4), 0.45 * arrive)
+    if (look.lengthSq() === 0 || reduced) look.copy(lookAt)
+    else look.lerp(lookAt, smooth(dt, 260))
     tmp.set(look.x + pointer.x * 1.6, look.y + dist * 0.6 - pointer.y * 1.2, look.z + dist * 0.8)
     if (camPos.lengthSq() === 0 || reduced) camPos.copy(tmp)
     else camPos.lerp(tmp, smooth(dt, 260))
@@ -456,7 +658,7 @@ export function createWorld(canvas, { count, tones, reduced = false, onFrame, on
     dirty = false
     if (onFrame) {
       const points = landmarks.map((l) => {
-        tmp.set(l.x, l.base + 1.15 + l.lift * 0.35, l.z).project(camera)
+        tmp.set(l.x, l.labelY + l.lift * 0.12, l.z).project(camera)
         return { x: (tmp.x * 0.5 + 0.5) * size.w, y: (-tmp.y * 0.5 + 0.5) * size.h }
       })
       onFrame(points)
@@ -471,8 +673,8 @@ export function createWorld(canvas, { count, tones, reduced = false, onFrame, on
       pingT >= 1 &&
       Math.abs(pointer.tx - pointer.x) < 0.001 &&
       Math.abs(pointer.ty - pointer.y) < 0.001 &&
-      landmarks.every((l, i) => Math.abs(l.lift - (i === near ? 1 : i === hover ? 0.45 : 0)) < 0.002) &&
-      trees.every((t) => Math.abs(t.wobble) < 0.001 && Math.abs(t.wobbleV) < 0.001)
+      landmarks.every((l, i) => Math.abs(l.lift - liftFor(i)) < 0.002) &&
+      trees.every((tr) => Math.abs(tr.wobble) < 0.001 && Math.abs(tr.wobbleV) < 0.001)
     )
   }
 
@@ -507,9 +709,10 @@ export function createWorld(canvas, { count, tones, reduced = false, onFrame, on
       if (o.geometry) o.geometry.dispose()
     })
     Object.values(mats).forEach((m) => m.dispose())
-    toneMats.forEach((m) => m.dispose())
-    glow.dispose()
-    marker.dispose()
+    wallMats.forEach((m) => m.dispose())
+    ;[glow, marker, flyMat].forEach((m) => m.dispose())
+    stones.dispose()
+    grass.dispose()
     renderer.dispose()
   }
 
@@ -537,6 +740,9 @@ export function createWorld(canvas, { count, tones, reduced = false, onFrame, on
     },
     get near() {
       return near
+    },
+    get night() {
+      return night
     },
   }
 }
