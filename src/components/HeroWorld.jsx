@@ -23,6 +23,15 @@ const themeColors = () => {
   return { surface: v('surface'), line: v('line'), fg: v('fg'), muted: v('muted'), accent: v('accent') }
 }
 
+// Which model stands for which project; a new project gets the workshop desk until it has its own
+const KIND = { 'saliba-polyclinic': 'clinic', iverse: 'shop', 'recipe-finder': 'kitchen', portfolio: 'workshop' }
+// One landmark per project, then the arcade that leads to the games
+const ARCADE = projects.length
+const SPECS = [
+  ...projects.map((p) => ({ kind: KIND[p.slug] ?? 'workshop', tone: p.tone ?? '#e5e3dc' })),
+  { kind: 'arcade', tone: '#d9c7b8' },
+]
+
 // The hero's island: roll a ball to a project's landmark and open it from there
 export default function HeroWorld({ className = '' }) {
   const { t, pick, dir } = useI18n()
@@ -43,7 +52,8 @@ export default function HeroWorld({ className = '' }) {
 
   const open = (i) => {
     setVisited((v) => new Set(v).add(i))
-    openProject(projects[i].slug)
+    if (i === ARCADE) document.getElementById('play')?.scrollIntoView({ behavior: reduced ? 'instant' : 'smooth' })
+    else openProject(projects[i].slug)
   }
   // The world is built once, so its click handler reaches the latest `open` through a ref
   const openRef = useRef(open)
@@ -62,8 +72,7 @@ export default function HeroWorld({ className = '' }) {
         .then(({ createWorld }) => {
           if (cancelled) return
           world = createWorld(canvasRef.current, {
-            count: projects.length,
-            tones: projects.map((p) => p.tone ?? '#e5e3dc'),
+            landmarks: SPECS,
             reduced,
             onNear: (i) => {
               nearRef.current = i
@@ -207,8 +216,9 @@ export default function HeroWorld({ className = '' }) {
 
   if (failed) return null
 
-  const nearProject = projects[near]
-  const done = visited.size === projects.length
+  const titleOf = (i) => (i === ARCADE ? t.world.arcade.title : pick(projects[i].title))
+  const seen = [...visited].filter((i) => i < ARCADE).length
+  const done = seen === projects.length
   const resume = profile.resume ? { href: profile.resume, label: t.world.resume } : { href: '#experience', label: t.nav.experience }
   const link = 'pointer-events-auto link text-fg'
 
@@ -233,11 +243,19 @@ export default function HeroWorld({ className = '' }) {
 
       {/* Labels float over the landmarks; they're real buttons, so Tab walks the island too */}
       <ol className={`transition-opacity delay-500 duration-700 ${ready ? 'opacity-100' : 'opacity-0'}`}>
-        {projects.map((project, i) => {
+        {SPECS.map((spec, i) => {
           const here = near === i
+          const arcade = i === ARCADE
+          const label = arcade
+            ? here
+              ? t.world.arcade.play
+              : t.world.arcade.goTo
+            : here
+              ? t.work.openProject(pad(i + 1), titleOf(i))
+              : t.work.goTo(pad(i + 1), titleOf(i))
           return (
             <li
-              key={project.slug}
+              key={arcade ? 'arcade' : projects[i].slug}
               ref={(el) => (labelRefs.current[i] = el)}
               // Physical left/top: the position comes from the canvas, which doesn't mirror
               className={`pointer-events-none absolute top-0 left-0 ${here ? 'z-10' : ''}`}
@@ -247,7 +265,7 @@ export default function HeroWorld({ className = '' }) {
                 data-landmark=""
                 onClick={() => (here ? open(i) : worldRef.current?.goTo(i))}
                 onFocus={(e) => e.currentTarget.matches(':focus-visible') && worldRef.current?.goTo(i)}
-                aria-label={here ? t.work.openProject(pad(i + 1), pick(project.title)) : t.work.goTo(pad(i + 1), pick(project.title))}
+                aria-label={label}
                 className={`pointer-events-auto block -translate-x-1/2 -translate-y-full border text-start shadow-sm backdrop-blur-sm transition-[background-color,border-color,border-radius,box-shadow] duration-300 ease-out ${
                   here
                     ? 'w-56 rounded-[10px] sm:w-64 border-accent/60 bg-surface/95 p-3.5 shadow-[0_18px_40px_-20px_rgb(40_25_10/0.5)]'
@@ -255,10 +273,12 @@ export default function HeroWorld({ className = '' }) {
                 }`}
               >
                 <span className="flex items-center gap-2 text-xs whitespace-nowrap text-fg">
-                  <span className="tabular-nums opacity-60" dir="ltr">
-                    {pad(i + 1)}
-                  </span>
-                  <span className={here ? 'font-medium' : ''}>{pick(project.title)}</span>
+                  {!arcade && (
+                    <span className="tabular-nums opacity-60" dir="ltr">
+                      {pad(i + 1)}
+                    </span>
+                  )}
+                  <span className={here ? 'font-medium' : ''}>{titleOf(i)}</span>
                   {visited.has(i) && !here && (
                     <span aria-hidden="true" className="text-accent">
                       ✓
@@ -267,9 +287,11 @@ export default function HeroWorld({ className = '' }) {
                 </span>
                 {here && (
                   <span className="world-card block whitespace-normal">
-                    <span className="mt-1.5 block text-xs leading-relaxed text-muted">{pick(project.summary)}</span>
+                    <span className="mt-1.5 block text-xs leading-relaxed text-muted">
+                      {arcade ? t.world.arcade.summary : pick(projects[i].summary)}
+                    </span>
                     <span aria-hidden="true" className="mt-2.5 inline-flex items-center gap-1.5 text-xs font-medium text-accent">
-                      {t.world.open} <span className="inline-block rtl:-scale-x-100">→</span>
+                      {arcade ? t.world.arcade.open : t.world.open} <span className="inline-block rtl:-scale-x-100">{arcade ? '↓' : '→'}</span>
                     </span>
                   </span>
                 )}
@@ -302,13 +324,13 @@ export default function HeroWorld({ className = '' }) {
                 <span key={p.slug} className={`size-1.5 rounded-full transition-colors duration-500 ${visited.has(i) ? 'bg-accent' : 'bg-line'}`} />
               ))}
             </span>
-            <span className="tabular-nums">{t.world.visited(visited.size, projects.length)}</span>
+            <span className="tabular-nums">{t.world.visited(seen, projects.length)}</span>
           </span>
           <a href="#work" className={link}>
             {t.world.skip} <span aria-hidden="true">↓</span>
           </a>
         </div>
-        {visited.size > 0 && (
+        {seen > 0 && (
           <p className="world-card flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
             <span>{done ? t.world.nextDone : t.world.next}</span>
             <a href={profile.github} target="_blank" rel="noreferrer" className={link}>
@@ -325,7 +347,7 @@ export default function HeroWorld({ className = '' }) {
       </div>
 
       <p className="sr-only" aria-live="polite">
-        {nearProject ? t.world.arrived(pick(nearProject.title)) : ''}
+        {near >= 0 ? (near === ARCADE ? t.world.arcade.arrived : t.world.arrived(titleOf(near))) : ''}
       </p>
     </div>
   )
