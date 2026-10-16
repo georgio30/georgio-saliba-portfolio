@@ -46,6 +46,115 @@ const layer = {
 
 export const projects = [
   {
+    slug: 'money-planner',
+    title: 'Money Planner',
+    year: '2026',
+    type: { en: 'Full-stack web app', fr: 'Application web full-stack', ar: 'تطبيق ويب متكامل' },
+    summary: {
+      en: 'Budgets, bills, savings goals and a forecast of what you can afford.',
+      fr: 'Budgets, factures, objectifs d’épargne et une prévision de ce que vous pouvez vous permettre.',
+      ar: 'ميزانيات وفواتير وأهداف ادخار وتوقّع لما يمكنك تحمّله.',
+    },
+    description: {
+      en: 'A personal finance and shopping assistant: transactions, monthly budgets with alerts, recurring bills, savings goals, balance forecasting, rule-based insights, store price comparison with affordability checks, CSV reports and multi-currency support.',
+      fr: 'Un assistant de finances personnelles et d’achats : transactions, budgets mensuels avec alertes, factures récurrentes, objectifs d’épargne, prévision du solde, analyses automatiques, comparaison de prix entre magasins avec vérification de l’accessibilité, rapports CSV et multidevise.',
+      ar: 'مساعد للمالية الشخصية والتسوّق: معاملات، وميزانيات شهرية مع تنبيهات، وفواتير متكررة، وأهداف ادخار، وتوقّع للرصيد، وتحليلات قائمة على قواعد، ومقارنة أسعار المتاجر مع فحص القدرة على الشراء، وتقارير CSV، ودعم عملات متعددة.',
+    },
+    technologies: ['React', 'TypeScript', 'Ant Design', 'Recharts', 'Node.js', 'Express', 'MySQL', 'JWT'],
+    layers: [
+      { name: layer.interface, items: ['React', 'TypeScript', 'React Query', 'Ant Design', 'Recharts'] },
+      {
+        name: layer.api,
+        items: [
+          'Express',
+          { en: 'JWT auth', fr: 'Auth JWT', ar: 'مصادقة JWT' },
+          { en: 'Hourly scheduler', fr: 'Planificateur horaire', ar: 'مجدول كل ساعة' },
+          { en: 'ECB exchange rates', fr: 'Taux de change BCE', ar: 'أسعار صرف البنك المركزي الأوروبي' },
+        ],
+      },
+      { name: layer.data, items: ['MySQL', { en: 'Numbered migrations', fr: 'Migrations numérotées', ar: 'ترحيلات مرقّمة' }] },
+    ],
+    screenshots: [],
+    github: null,
+    live: null,
+    note: { en: 'Most recent build', fr: 'Le plus récent', ar: 'الأحدث' },
+    tone: '#e1e8df',
+    category: 'fullstack',
+    facts: [
+      {
+        value: '0',
+        label: {
+          en: 'floats in the money maths: every amount is integer cents',
+          fr: 'nombre à virgule flottante dans les calculs : chaque montant est en centimes entiers',
+          ar: 'أعداد عشرية عائمة في الحسابات المالية: كل مبلغ بالسنتات الصحيحة',
+        },
+      },
+      {
+        value: '14',
+        label: {
+          en: 'screens, from the dashboard to reports and settings',
+          fr: 'écrans, du tableau de bord aux rapports et réglages',
+          ar: 'شاشة، من لوحة التحكم إلى التقارير والإعدادات',
+        },
+      },
+    ],
+    caseStudy: {
+      challenges: [
+        {
+          title: {
+            en: 'Money that adds up to the cent',
+            fr: 'Des comptes justes au centime près',
+            ar: 'أرقام صحيحة حتى السنت',
+          },
+          text: {
+            en: 'Floating-point maths drifts by fractions of a cent. Every amount is stored and summed as integer cents, and currency conversion uses BigInt with half-up rounding. Each transaction keeps its original amount, the rate used and the converted amount, so history never shifts when rates move.',
+            fr: 'Les calculs en virgule flottante dérivent de fractions de centime. Chaque montant est stocké et additionné en centimes entiers, et la conversion de devises utilise BigInt avec un arrondi au plus proche. Chaque transaction garde son montant d’origine, le taux utilisé et le montant converti : l’historique ne bouge pas quand les taux changent.',
+            ar: 'تنحرف الحسابات بالأعداد العشرية العائمة بأجزاء من السنت. يُخزَّن كل مبلغ ويُجمع بالسنتات الصحيحة، ويستخدم تحويل العملات BigInt مع تقريب إلى الأقرب. تحتفظ كل معاملة بمبلغها الأصلي والسعر المستخدم والمبلغ المحوَّل، فلا يتغيّر السجل عندما تتغيّر الأسعار.',
+          },
+        },
+        {
+          title: {
+            en: 'A double click that can’t pay twice',
+            fr: 'Un double clic qui ne paie pas deux fois',
+            ar: 'نقرة مزدوجة لا تدفع مرتين',
+          },
+          text: {
+            en: 'Buying a planned item, posting a recurring bill or withdrawing from a goal all move money. Each runs in a database transaction with row locks, so a double click or two requests at once can’t post the same payment twice.',
+            fr: 'Acheter un article prévu, enregistrer une facture récurrente ou retirer d’un objectif déplacent tous de l’argent. Chacun s’exécute dans une transaction de base de données avec verrous de ligne : un double clic ou deux requêtes simultanées ne peuvent pas enregistrer deux fois le même paiement.',
+            ar: 'شراء غرض مخطّط له، أو تسجيل فاتورة متكررة، أو السحب من هدف ادخار، كلها تحرّك المال. تعمل كل منها داخل معاملة في قاعدة البيانات مع أقفال على الصفوف، فلا تستطيع نقرة مزدوجة أو طلبان متزامنان تسجيل الدفعة نفسها مرتين.',
+          },
+        },
+      ],
+      problem: {
+        en: 'Tracking spending is only half the job. People want to know whether they can afford something before they buy it, and whether this month is on track before it ends.',
+        fr: 'Suivre ses dépenses ne fait que la moitié du travail. On veut savoir si l’on peut se permettre un achat avant de le faire, et si le mois est sur la bonne voie avant qu’il se termine.',
+        ar: 'تتبّع المصاريف نصف المهمة فقط. يريد الناس أن يعرفوا إن كانوا قادرين على شراء شيء قبل شرائه، وإن كان الشهر يسير كما يجب قبل أن ينتهي.',
+      },
+      approach: {
+        en: [
+          'Kept the Express API in layers, routes, controllers and services, with every query scoped to the signed-in user.',
+          'Forecast the balance from recurring income and bills, planned purchases and average day-to-day spending, then simulated a purchase in it to judge whether it is safe, tight or unsafe.',
+          'Built the React and TypeScript screens with React Query, Ant Design and Recharts, with budget alerts and bill reminders arriving as in-app notifications.',
+        ],
+        fr: [
+          'Organisé l’API Express en couches, routes, contrôleurs et services, chaque requête étant limitée à l’utilisateur connecté.',
+          'Prévu le solde à partir des revenus et factures récurrents, des achats prévus et des dépenses quotidiennes moyennes, puis simulé un achat dedans pour juger s’il est sûr, juste ou risqué.',
+          'Construit les écrans React et TypeScript avec React Query, Ant Design et Recharts, avec alertes de budget et rappels de factures sous forme de notifications.',
+        ],
+        ar: [
+          'قسّمتُ واجهة Express البرمجية إلى طبقات: مسارات ووحدات تحكّم وخدمات، مع حصر كل استعلام بالمستخدم المسجّل.',
+          'توقّعتُ الرصيد من الدخل والفواتير المتكررة والمشتريات المخطّطة ومتوسط الإنفاق اليومي، ثم حاكيتُ عملية شراء داخله للحكم إن كانت آمنة أو ضيّقة أو غير آمنة.',
+          'بنيتُ شاشات React وTypeScript باستخدام React Query وAnt Design وRecharts، مع تنبيهات الميزانية وتذكيرات الفواتير كإشعارات داخل التطبيق.',
+        ],
+      },
+      result: {
+        en: 'A finance app that answers “can I afford this?” from your own numbers, with totals that stay correct to the cent across currencies.',
+        fr: 'Une application de finances qui répond à « est-ce que je peux me le permettre ? » à partir de vos propres chiffres, avec des totaux justes au centime, toutes devises confondues.',
+        ar: 'تطبيق مالي يجيب عن سؤال «هل أستطيع تحمّل هذا؟» من أرقامك أنت، بمجاميع تبقى صحيحة حتى السنت عبر العملات.',
+      },
+    },
+  },
+  {
     slug: 'saliba-polyclinic',
     title: 'Saliba Polyclinic',
     year: '2026',
@@ -77,7 +186,6 @@ export const projects = [
     screenshots: [],
     github: null,
     live: null,
-    note: { en: 'Most recent build', fr: 'Le plus récent', ar: 'الأحدث' },
     tone: '#ebe7dc',
     category: 'fullstack',
     facts: [

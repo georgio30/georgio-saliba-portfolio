@@ -17,9 +17,9 @@ export const chatQuestions = [
     id: 'built',
     q: { en: 'What have you built?', fr: 'Qu’avez-vous construit ?', ar: 'ماذا بنيت؟' },
     a: {
-      en: 'Four things so far: Saliba Polyclinic (a clinic system with role-based logins), Iverse (an online store), Recipe Finder (a React Native app for iOS and Android) and this portfolio. Each one opens with a short case study.',
-      fr: 'Quatre choses jusqu’ici : Saliba Polyclinic (un système de clinique avec connexions par rôle), Iverse (une boutique en ligne), Recipe Finder (une appli React Native pour iOS et Android) et ce portfolio. Chacun s’ouvre sur une courte étude de cas.',
-      ar: 'أربعة أشياء حتى الآن: Saliba Polyclinic (نظام عيادة بتسجيل دخول حسب الدور)، وIverse (متجر إلكتروني)، وRecipe Finder (تطبيق React Native لـ iOS وAndroid)، وهذا الموقع. يفتح كل مشروع بدراسة حالة قصيرة.',
+      en: 'Five things so far: Money Planner (budgets, bills and a forecast of what you can afford), Saliba Polyclinic (a clinic system with role-based logins), Iverse (an online store), Recipe Finder (a React Native app for iOS and Android) and this portfolio. Each one opens with a short case study.',
+      fr: 'Cinq choses jusqu’ici : Money Planner (budgets, factures et une prévision de ce que vous pouvez vous permettre), Saliba Polyclinic (un système de clinique avec connexions par rôle), Iverse (une boutique en ligne), Recipe Finder (une appli React Native pour iOS et Android) et ce portfolio. Chacun s’ouvre sur une courte étude de cas.',
+      ar: 'خمسة أشياء حتى الآن: Money Planner (ميزانيات وفواتير وتوقّع لما يمكنك تحمّله)، وSaliba Polyclinic (نظام عيادة بتسجيل دخول حسب الدور)، وIverse (متجر إلكتروني)، وRecipe Finder (تطبيق React Native لـ iOS وAndroid)، وهذا الموقع. يفتح كل مشروع بدراسة حالة قصيرة.',
     },
     action: { href: '#work', label: { en: 'See the projects', fr: 'Voir les projets', ar: 'شاهد المشاريع' } },
   },

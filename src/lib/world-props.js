@@ -12,6 +12,40 @@ function part(geometry, mat, x = 0, y = 0, z = 0) {
 const box = (w, h, d, mat, x, y, z) => part(new BoxGeometry(w, h, d), mat, x, y, z)
 const cyl = (rt, rb, h, seg, mat, x, y, z) => part(new CylinderGeometry(rt, rb, h, seg), mat, x, y, z)
 
+// Money Planner: a little bank with columns, and coin stacks out front that grow when you arrive
+function bank(m, wall) {
+  const g = new Group()
+  g.add(box(1, 0.08, 0.7, m.stone, 0, 0.04, 0))
+  g.add(box(0.86, 0.5, 0.5, wall, 0, 0.33, -0.06))
+  // Columns along the front, then the beam and pediment above them
+  for (const x of [-0.36, -0.12, 0.12, 0.36]) g.add(cyl(0.04, 0.045, 0.5, 8, m.stone, x, 0.33, 0.26))
+  g.add(box(0.96, 0.07, 0.66, m.stone, 0, 0.615, 0))
+  const pediment = part(new ConeGeometry(0.56, 0.2, 4), m.roof, 0, 0.75, 0)
+  pediment.rotation.y = Math.PI / 4
+  pediment.scale.set(1.2, 1, 0.82)
+  g.add(pediment)
+  g.add(box(0.2, 0.3, 0.02, m.dark, 0, 0.23, 0.195))
+  g.add(box(0.14, 0.12, 0.02, m.window, -0.3, 0.34, 0.195))
+  g.add(box(0.14, 0.12, 0.02, m.window, 0.3, 0.34, 0.195))
+  // Coin stacks of different heights by the steps
+  const stacks = [
+    [0.62, 0.3, 3],
+    [0.74, 0.12, 5],
+    [-0.64, 0.28, 4],
+  ].map(([x, z, n]) => {
+    const s = new Group()
+    s.position.set(x, 0, z)
+    for (let i = 0; i < n; i++) s.add(cyl(0.07, 0.07, 0.035, 10, m.accent, 0, 0.02 + i * 0.04, 0))
+    g.add(s)
+    return s
+  })
+  return {
+    group: g,
+    top: 0.85,
+    update: (t, lift) => stacks.forEach((s, i) => (s.scale.y = 1 + lift * (0.4 + i * 0.2) + Math.sin(t * 2 + i) * 0.02)),
+  }
+}
+
 // Saliba Polyclinic: a small clinic whose door slides open when you arrive (access, granted)
 function clinic(m, wall) {
   const g = new Group()
@@ -198,7 +232,7 @@ function hangar(m, wall) {
   }
 }
 
-const KINDS = { clinic, shop, kitchen, workshop, shack, hangar }
+const KINDS = { bank, clinic, shop, kitchen, workshop, shack, hangar }
 
 export function buildLandmark(kind, m, wall) {
   return (KINDS[kind] ?? workshop)(m, wall)

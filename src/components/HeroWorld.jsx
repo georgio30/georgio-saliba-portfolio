@@ -24,7 +24,13 @@ const themeColors = () => {
 }
 
 // Which model stands for which project; a new project gets the workshop desk until it has its own
-const KIND = { 'saliba-polyclinic': 'clinic', iverse: 'shop', 'recipe-finder': 'kitchen', portfolio: 'workshop' }
+const KIND = {
+  'money-planner': 'bank',
+  'saliba-polyclinic': 'clinic',
+  iverse: 'shop',
+  'recipe-finder': 'kitchen',
+  portfolio: 'workshop',
+}
 // One island per project, then the home island's hangar (the games) and shack (about Georgio)
 const ARCADE = projects.length
 const ABOUT = projects.length + 1
