@@ -41,10 +41,9 @@ export default function HeroWorld({ className = '' }) {
   // Landmarks reached on this visit, for the progress dots and the "what next" links
   const [visited, setVisited] = useState(() => new Set())
 
-  // Opening from a landmark: its card is what grows into the case study
   const open = (i) => {
     setVisited((v) => new Set(v).add(i))
-    openProject(projects[i].slug, labelRefs.current[i]?.querySelector('button'))
+    openProject(projects[i].slug)
   }
   // The world is built once, so its click handler reaches the latest `open` through a ref
   const openRef = useRef(open)

@@ -116,7 +116,6 @@ export default function ProjectShowcase() {
   const [hovered, setHovered] = useState(null)
   // Where the open case study came from: 'island' or 'list'
   const [origin, setOrigin] = useState('list')
-  const islandCard = useRef(null)
 
   const visible = useMemo(() => projects.filter((p) => matches(p, filter)), [filter])
 
@@ -199,9 +198,8 @@ export default function ProjectShowcase() {
   // Closing: shrinks back into its card on phones. On desktop the pointer has usually moved on,
   // so the case study fades out by itself (returning false says so)
   const morphClose = () => {
-    // Opened from the island: shrink back into the landmark's card, which is still there
-    const card = origin === 'island' && islandCard.current?.isConnected ? islandCard.current : null
-    const visual = card ?? (list ? null : visualFor(open))
+    // Opened from the island, it fades out by itself
+    const visual = origin === 'island' || list ? null : visualFor(open)
     if (!canMorph() || !visual) return false
     const transition = document.startViewTransition(() => {
       flushSync(() => setOpen(null))
@@ -212,23 +210,14 @@ export default function ProjectShowcase() {
     return true
   }
 
-  // From the hero's island: the landmark's card grows into the case study, whatever the filter
+  // From the hero's island: open the case study straight away, whatever the filter.
+  // No morph here: growing a small rounded label into the gallery looks round before it turns square.
   useEffect(() => {
     const onOpen = (e) => {
-      const { slug, from } = e.detail
-      islandCard.current = from
-      const show = () => {
-        if (!visible.some((p) => p.slug === slug)) setFilter('all')
-        setOrigin('island')
-        setOpen(slug)
-      }
-      if (!canMorph() || !from) return show()
-      from.style.viewTransitionName = MORPH
-      const transition = document.startViewTransition(() => {
-        from.style.viewTransitionName = ''
-        flushSync(show)
-      })
-      transition.ready.catch(() => {})
+      const { slug } = e.detail
+      if (!visible.some((p) => p.slug === slug)) setFilter('all')
+      setOrigin('island')
+      setOpen(slug)
     }
     window.addEventListener('open-project', onOpen)
     return () => window.removeEventListener('open-project', onOpen)

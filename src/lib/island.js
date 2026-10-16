@@ -10,6 +10,5 @@ export function hasWebGL() {
   }
 }
 
-// ProjectShowcase listens for this and opens the case study. `from` is the element
-// that grows into the case study (the landmark's card), when there is one.
-export const openProject = (slug, from = null) => window.dispatchEvent(new CustomEvent('open-project', { detail: { slug, from } }))
+// ProjectShowcase listens for this and opens the case study
+export const openProject = (slug) => window.dispatchEvent(new CustomEvent('open-project', { detail: { slug } }))
