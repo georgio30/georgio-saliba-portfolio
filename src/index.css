@@ -308,6 +308,36 @@ body {
   animation: world-card 0.45s var(--ease-out-soft) both;
 }
 
+/* Labels of islands that drift off the canvas, or behind the headline, can't be clicked while hidden */
+[data-hidden="true"] {
+  transition: opacity 0.25s;
+}
+
+[data-hidden="true"] > * {
+  pointer-events: none;
+}
+
+/* On phones an open card is docked at the top of the world, wherever its landmark is */
+.world-docked {
+  translate: none !important;
+  opacity: 1 !important;
+}
+
+.world-docked > * {
+  pointer-events: auto !important;
+}
+
+/* Beside the headline the archipelago fades out toward the text, so islands never sit behind the words */
+@media (min-width: 1024px) {
+  .world-mask {
+    mask-image: linear-gradient(to right, transparent 30%, #000 48%);
+  }
+
+  [dir="rtl"] .world-mask {
+    mask-image: linear-gradient(to left, transparent 30%, #000 48%);
+  }
+}
+
 /* The project list: rows settle in one after another, and hovering one quiets the rest */
 @keyframes row-in {
   from {
