@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { projects } from '../data/projects'
 import { profile } from '../data/resume'
 import { pad } from '../lib/motion'
-import { useMediaQuery, useReducedMotion, useTheme } from '../lib/hooks'
+import { useReducedMotion, useTheme } from '../lib/hooks'
 import { openProject } from '../lib/island'
 import { useI18n } from '../i18n'
 
@@ -39,8 +39,6 @@ export default function HeroWorld({ className = '' }) {
   const { t, pick, dir } = useI18n()
   const [dark] = useTheme()
   const reduced = useReducedMotion()
-  const wide = useMediaQuery('(min-width: 1024px)')
-  const finePointer = useMediaQuery('(pointer: fine)')
   const wrapRef = useRef(null)
   const canvasRef = useRef(null)
   const labelRefs = useRef([])
@@ -121,20 +119,20 @@ export default function HeroWorld({ className = '' }) {
     worldRef.current?.start()
   }, [ready, dark])
 
-  // On wide screens the island sits beside the headline, on the side away from the text
+  // The world sits beside the headline, on the side away from the text
   useEffect(() => {
     if (!ready) return
-    worldRef.current.setFrame(wide ? { focusX: dir === 'rtl' ? 0.31 : 0.69, width: 0.54 } : { focusX: 0.5, width: 1, view: 11 })
+    worldRef.current.setFrame({ focusX: dir === 'rtl' ? 0.31 : 0.69, width: 0.54 })
     const measure = () => {
       const w = wrapRef.current.clientWidth
       const h = wrapRef.current.clientHeight
-      // On wide screens the headline covers one side; the canvas fades out there (.world-mask)
-      boundsRef.current = wide ? (dir === 'rtl' ? { lo: 0, hi: w * 0.6, h } : { lo: w * 0.4, hi: w, h }) : { lo: 0, hi: w, h }
+      // The headline covers one side; the canvas fades out there (.world-mask)
+      boundsRef.current = dir === 'rtl' ? { lo: 0, hi: w * 0.6, h } : { lo: w * 0.4, hi: w, h }
     }
     measure()
     window.addEventListener('resize', measure)
     return () => window.removeEventListener('resize', measure)
-  }, [ready, wide, dir])
+  }, [ready, dir])
 
   // Size, and only running while it's on screen and the tab is visible
   useEffect(() => {
@@ -274,11 +272,11 @@ export default function HeroWorld({ className = '' }) {
           const about = i === ABOUT
           if (about && here) {
             return (
-              <li key="about" ref={(el) => (labelRefs.current[i] = el)} className={`pointer-events-none absolute z-10 ${wide ? 'top-0 left-0' : 'world-docked inset-x-3 top-3'}`}>
+              <li key="about" ref={(el) => (labelRefs.current[i] = el)} className="pointer-events-none absolute top-0 left-0 z-10">
                 <div
                   role="region"
                   aria-label={t.world.about.title}
-                  className={`world-card pointer-events-auto ${wide ? 'w-72 -translate-x-1/2 -translate-y-full' : 'w-full'} rounded-[10px] border border-accent/60 bg-surface/95 p-4 text-start shadow-[0_18px_40px_-20px_rgb(40_25_10/0.5)] backdrop-blur-sm`}
+                  className="world-card pointer-events-auto w-72 -translate-x-1/2 -translate-y-full rounded-[10px] border border-accent/60 bg-surface/95 p-4 text-start shadow-[0_18px_40px_-20px_rgb(40_25_10/0.5)] backdrop-blur-sm"
                 >
                   <p className="font-display text-xl leading-tight text-fg">{t.world.about.title}</p>
                   <p className="mt-2 text-xs leading-relaxed text-muted">{t.world.about.text}</p>
@@ -293,7 +291,7 @@ export default function HeroWorld({ className = '' }) {
                       {t.world.about.projects}
                     </a>
                   </p>
-                  <p className="mt-3 text-[0.7rem] text-muted">{finePointer ? t.world.about.hintMouse : t.world.about.hintTouch}</p>
+                  <p className="mt-3 text-[0.7rem] text-muted">{t.world.about.hint}</p>
                 </div>
               </li>
             )
@@ -312,7 +310,7 @@ export default function HeroWorld({ className = '' }) {
               key={about ? 'about' : arcade ? 'arcade' : projects[i].slug}
               ref={(el) => (labelRefs.current[i] = el)}
               // Physical left/top: the position comes from the canvas, which doesn't mirror
-              className={`pointer-events-none absolute ${here && !wide ? 'world-docked inset-x-3 top-3 z-10' : `top-0 left-0 ${here ? 'z-10' : ''}`}`}
+              className={`pointer-events-none absolute top-0 left-0 ${here ? 'z-10' : ''}`}
             >
               <button
                 type="button"
@@ -320,7 +318,7 @@ export default function HeroWorld({ className = '' }) {
                 onClick={() => (here ? open(i) : worldRef.current?.goTo(i))}
                 onFocus={(e) => e.currentTarget.matches(':focus-visible') && worldRef.current?.goTo(i)}
                 aria-label={label}
-                className={`pointer-events-auto block ${here && !wide ? 'w-full' : '-translate-x-1/2 -translate-y-full'} border text-start shadow-sm backdrop-blur-sm transition-[background-color,border-color,border-radius,box-shadow] duration-300 ease-out ${
+                className={`pointer-events-auto block -translate-x-1/2 -translate-y-full border text-start shadow-sm backdrop-blur-sm transition-[background-color,border-color,border-radius,box-shadow] duration-300 ease-out ${
                   here
                     ? 'rounded-[10px] lg:w-64 border-accent/60 bg-surface/95 p-3.5 shadow-[0_18px_40px_-20px_rgb(40_25_10/0.5)]'
                     : 'rounded-full border-line bg-ink/80 px-3 py-1.5 hover:border-fg/30'
@@ -365,7 +363,7 @@ export default function HeroWorld({ className = '' }) {
             t.world.done
           ) : (
             <>
-              {finePointer ? t.world.hintMouse : t.world.hintTouch}
+              {t.world.hint}
               <span className="mx-2 hidden opacity-50 group-focus-visible/world:inline">·</span>
               <span className="hidden group-focus-visible/world:inline">{t.world.hintKeys}</span>
             </>

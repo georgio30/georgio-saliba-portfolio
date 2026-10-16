@@ -4,8 +4,10 @@ import Words from './Words'
 import HeroWorld from './HeroWorld'
 import { hasWebGL } from '../lib/island'
 import { profile } from '../data/resume'
-import { useReducedMotion } from '../lib/hooks'
+import { useMediaQuery, useReducedMotion } from '../lib/hooks'
 import { useI18n } from '../i18n'
+
+const DESKTOP = '(min-width: 1024px) and (hover: hover) and (pointer: fine)'
 
 const wordCount = (text) => text.split(/\s+/).filter(Boolean).length
 
@@ -14,8 +16,11 @@ export default function Hero() {
   const reduced = useReducedMotion()
   const innerRef = useRef(null)
   const worldRef = useRef(null)
-  // Decided before first paint, so the layout doesn't jump when the world arrives
-  const [world] = useState(hasWebGL)
+  // The archipelago is for desktops with a mouse; phones, tablets and touch screens get the plain headline
+  // and never download three.js. Decided before first paint, so the layout doesn't jump when the world arrives.
+  const [webgl] = useState(hasWebGL)
+  const desktop = useMediaQuery(DESKTOP)
+  const world = webgl && desktop
 
   // The hero eases back as the work comes up behind it
   useEffect(() => {
@@ -136,7 +141,7 @@ export default function Hero() {
       </div>
 
       {world && (
-        <div ref={worldRef} className="relative h-[min(64svh,32rem)] w-full lg:absolute lg:inset-x-0 lg:top-0 lg:h-[100svh]">
+        <div ref={worldRef} className="absolute inset-x-0 top-0 h-[100svh]">
           <HeroWorld className="absolute inset-0" />
         </div>
       )}
