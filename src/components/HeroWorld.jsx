@@ -51,7 +51,7 @@ export default function HeroWorld({ className = '' }) {
   const worldRef = useRef(null)
   const nearRef = useRef(-1)
   // The part of the canvas (in px) where labels may show
-  const boundsRef = useRef({ lo: 0, hi: Infinity, h: Infinity })
+  const boundsRef = useRef({ lo: 0, hi: Infinity, h: Infinity, top: 0 })
   const [ready, setReady] = useState(false)
   const [failed, setFailed] = useState(false)
   const [near, setNear] = useState(-1)
@@ -93,11 +93,15 @@ export default function HeroWorld({ className = '' }) {
             onPick: (i) => (nearRef.current === i ? openRef.current(i) : world.goTo(i)),
             onFrame: (points) => {
               // Labels fade out where the world is masked away behind the headline, or off the canvas
-              const { lo, hi, h } = boundsRef.current
+              const { lo, hi, h, top } = boundsRef.current
+              // The open card hangs above its landmark; keep its top edge below the navbar.
+              // Measured before this frame's writes so it doesn't force a layout.
+              const cardH = labelRefs.current[nearRef.current]?.firstElementChild?.offsetHeight ?? 0
               points.forEach((p, i) => {
                 const el = labelRefs.current[i]
                 if (!el) return
-                el.style.translate = `${p.x.toFixed(1)}px ${p.y.toFixed(1)}px`
+                const y = i === nearRef.current ? Math.max(p.y, top + cardH) : p.y
+                el.style.translate = `${p.x.toFixed(1)}px ${y.toFixed(1)}px`
                 const shown = p.x > lo && p.x < hi && p.y > 30 && p.y < h - 20
                 el.style.opacity = shown ? '' : '0'
                 el.dataset.hidden = String(!shown)
@@ -132,12 +136,19 @@ export default function HeroWorld({ className = '' }) {
     const measure = () => {
       const w = wrapRef.current.clientWidth
       const h = wrapRef.current.clientHeight
+      // Lowest point of the fixed navbar, in the canvas's own coordinates, plus a little air
+      const nav = document.querySelector('header')?.getBoundingClientRect().bottom ?? 0
+      const top = nav + 12 - wrapRef.current.getBoundingClientRect().top
       // The headline covers one side; the canvas fades out there (.world-mask)
-      boundsRef.current = dir === 'rtl' ? { lo: 0, hi: w * 0.6, h } : { lo: w * 0.4, hi: w, h }
+      boundsRef.current = dir === 'rtl' ? { lo: 0, hi: w * 0.6, h, top } : { lo: w * 0.4, hi: w, h, top }
     }
     measure()
     window.addEventListener('resize', measure)
-    return () => window.removeEventListener('resize', measure)
+    window.addEventListener('scroll', measure, { passive: true })
+    return () => {
+      window.removeEventListener('resize', measure)
+      window.removeEventListener('scroll', measure)
+    }
   }, [ready, dir])
 
   // Size, and only running while it's on screen and the tab is visible
