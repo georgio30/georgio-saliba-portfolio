@@ -1,3 +1,6 @@
+import Reveal from './Reveal'
+import Words from './Words'
+
 // Editorial section: a small label in a narrow left column, content on the right
 export default function Section({ id, label, title, children }) {
   return (
@@ -6,7 +9,9 @@ export default function Section({ id, label, title, children }) {
         <p className="text-sm text-muted md:pt-3">{label}</p>
         <div>
           {title && (
-            <h2 className="mb-12 max-w-2xl text-balance font-display text-4xl leading-[1.1] text-fg md:mb-16 md:text-5xl">{title}</h2>
+            <Reveal as="h2" className="rise-on mb-12 max-w-2xl text-balance font-display text-4xl leading-[1.1] text-fg md:mb-16 md:text-5xl">
+              <Words text={title} />
+            </Reveal>
           )}
           {children}
         </div>

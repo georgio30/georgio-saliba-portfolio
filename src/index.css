@@ -82,6 +82,39 @@ body {
   transform: none;
 }
 
+/* Headlines: each word rises out of its own mask. .rise plays on load; .rise-on waits for its Reveal */
+.rise .w,
+.rise-on .w {
+  display: inline-block;
+  overflow: clip;
+  vertical-align: top;
+  /* Room for descenders and Arabic marks inside the mask */
+  padding-block: 0.08em 0.14em;
+  margin-block: -0.08em -0.14em;
+}
+
+.rise .w > span,
+.rise-on .w > span {
+  display: inline-block;
+  transform: translateY(108%);
+}
+
+.rise .w > span,
+.is-visible.rise-on .w > span,
+.is-visible .rise-on .w > span {
+  animation: rise 1s cubic-bezier(0.2, 0.75, 0.15, 1) both;
+  animation-delay: calc(var(--i, 0) * 65ms + var(--rise-delay, 0ms));
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(108%) rotate(2.5deg);
+  }
+  to {
+    transform: none;
+  }
+}
+
 /* Snake: menus fade in over the board, and the score gives a little bump when it changes */
 @keyframes snake-in {
   from {
@@ -115,6 +148,12 @@ body {
     opacity: 1;
     transform: none;
     transition: none;
+  }
+
+  .rise .w > span,
+  .rise-on .w > span {
+    animation: none !important;
+    transform: none;
   }
 
   *,

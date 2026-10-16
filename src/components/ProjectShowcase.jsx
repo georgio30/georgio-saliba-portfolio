@@ -257,6 +257,16 @@ export default function ProjectShowcase() {
     return true
   }
 
+  // From the hero's island: open a project's case study straight away, whatever the filter
+  useEffect(() => {
+    const onOpen = (e) => {
+      if (!visible.some((p) => p.slug === e.detail)) setFilter('all')
+      setOpen(e.detail)
+    }
+    window.addEventListener('open-project', onOpen)
+    return () => window.removeEventListener('open-project', onOpen)
+  }, [visible])
+
   // From a technology tag in a case study: close it and show every project that uses it
   const filterByTech = (tech) => {
     // Synchronously, so the case study has put the page's scroll back before the filter moves it
@@ -330,13 +340,13 @@ export default function ProjectShowcase() {
           <ol
             key={filter}
             ref={sceneRef}
-            className="work-scene grid h-full place-items-center pt-14 md:pt-24 [transform-style:preserve-3d]"
+            className="work-scene grid h-full place-items-center pt-14 pb-12 md:pt-32 md:pb-28 [transform-style:preserve-3d]"
           >
             {visible.map((project, i) => (
               <li
                 key={project.slug}
                 ref={(el) => (cardRefs.current[i] = el)}
-                className="w-[min(88vw,calc((100svh-16rem)*0.8))] [grid-area:1/1] md:w-[min(880px,88vw,calc((100svh-15rem)*1.6))] [transform-style:preserve-3d] will-change-transform"
+                className="w-[min(88vw,calc((100svh-16rem)*0.8))] [grid-area:1/1] md:w-[min(880px,88vw,calc((100svh-21rem)*1.6))] [transform-style:preserve-3d] will-change-transform"
               >
                 <ProjectCard
                   project={project}

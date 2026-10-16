@@ -5,9 +5,9 @@ export const craftPoints = [
     id: 'performance',
     title: { en: 'Performance', fr: 'Performance', ar: 'الأداء' },
     text: {
-      en: 'No animation, 3D or translation library: the gallery is plain CSS transforms and the translations are plain objects, so the page ships React and little else. Screenshots are WebP at two sizes and lazy-loaded, and the theme and language are applied before first paint so nothing flashes.',
-      fr: 'Aucune bibliothèque d’animation, de 3D ou de traduction : la galerie repose sur des transformations CSS et les traductions sont de simples objets, la page n’embarque donc presque que React. Les captures sont en WebP en deux tailles, chargées à la demande, et le thème comme la langue s’appliquent avant le premier affichage, sans scintillement.',
-      ar: 'لا مكتبة رسوم متحركة ولا ثلاثية الأبعاد ولا ترجمة: المعرض تحويلات CSS والترجمات كائنات بسيطة، فلا تحمل الصفحة سوى React تقريبًا. لقطات الشاشة بصيغة WebP بحجمين وتُحمَّل عند الحاجة، ويُطبَّق الوضع واللغة قبل أول عرض فلا يحدث وميض.',
+      en: 'The one library besides React is three.js, for the island at the top. It loads in its own chunk once the page has painted, and pauses when it’s off screen. The gallery is plain CSS transforms and the translations are plain objects. Screenshots are WebP at two sizes and lazy-loaded, and the theme and language are applied before first paint so nothing flashes.',
+      fr: 'La seule bibliothèque en plus de React est three.js, pour l’île en haut de page : elle se charge à part, une fois la page affichée, et se met en pause hors de l’écran. La galerie repose sur des transformations CSS et les traductions sont de simples objets. Les captures sont en WebP en deux tailles, chargées à la demande, et le thème comme la langue s’appliquent avant le premier affichage, sans scintillement.',
+      ar: 'المكتبة الوحيدة إلى جانب React هي three.js للجزيرة في أعلى الصفحة، وتُحمَّل في جزء منفصل بعد ظهور الصفحة وتتوقف حين تخرج من الشاشة. المعرض تحويلات CSS والترجمات كائنات بسيطة. لقطات الشاشة بصيغة WebP بحجمين وتُحمَّل عند الحاجة، ويُطبَّق الوضع واللغة قبل أول عرض فلا يحدث وميض.',
     },
   },
   {

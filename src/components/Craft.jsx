@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import Reveal from './Reveal'
 import Section from './Section'
+import EaseLab from './EaseLab'
 import { challenges, craftPoints } from '../data/craft'
 import { usePageStats, useReducedMotion, useTheme } from '../lib/hooks'
 import { useI18n } from '../i18n'
@@ -72,6 +73,10 @@ export default function Craft() {
           <LiveReadout />
         </Reveal>
       </div>
+
+      <Reveal className="mt-16 md:mt-20">
+        <EaseLab />
+      </Reveal>
 
       <Reveal className="mt-16 md:mt-20">
         <h3 className="text-sm text-muted">{t.craft.challenges}</h3>

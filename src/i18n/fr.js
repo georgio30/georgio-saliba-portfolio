@@ -29,6 +29,17 @@ export default {
     intro:
       'Des interfaces React et TypeScript posées sur des API Node.js et MySQL. Faites défiler pour en découvrir quelques-unes.',
     explore: 'Voir les projets',
+    introWorld:
+      'Des interfaces React et TypeScript posées sur des API Node.js et MySQL. Faites rouler la bille sur l’île pour en visiter quelques-unes, ou faites défiler pour la visite complète.',
+  },
+  world: {
+    role: 'Île interactive',
+    label: 'L’île des projets : un repère par projet',
+    open: 'Ouvrir',
+    hintMouse: 'Cliquez sur l’île pour y rouler · cliquez sur un repère pour le visiter',
+    hintTouch: 'Touchez l’île pour y rouler · touchez un repère pour le visiter',
+    hintKeys: 'Flèches ou ZQSD pour rouler · Entrée pour ouvrir',
+    arrived: (title) => `Vous êtes à ${title}. Appuyez sur Entrée pour l’ouvrir.`,
   },
   work: {
     label: 'Projets choisis',
@@ -292,6 +303,21 @@ export default {
     label: 'Les coulisses',
     title: 'Comment ce site est fabriqué, et ce que cela a demandé.',
     challenges: 'Des problèmes intéressants résolus',
+    lab: {
+      title: 'Pourquoi la galerie s’amortit au temps, pas à l’image',
+      intro: 'Chaque mouvement fluide du site comble à chaque image une part de l’écart avec sa cible. Avec une part fixe par image, il va vite sur un écran 144 Hz et lentement sur un téléphone à 30 i/s. Choisissez une fréquence et faites courir les deux versions.',
+      rate: 'Fréquence (i/s)',
+      smoothing: 'Amorti',
+      run: 'Lancer',
+      naive: 'Part fixe par image',
+      timed: 'Part selon le temps écoulé',
+      arrived: (time) => `À 95 % en ${time}`,
+      codeNaive: 'par image : réglé à 60 i/s',
+      codeTimed: 'au temps, depuis src/lib/stage.js',
+      hint: 'Appuyez sur Lancer, puis essayez 30 ou 144.',
+      same: 'À 60 i/s, ils coïncident : c’est l’écran sur lequel la version naïve a été réglée.',
+      differ: (fps) => `À ${fps} i/s, la version par image dérive ; celle au temps arrive au même moment sur tous les écrans.`,
+    },
     problem: 'Le problème',
     solution: 'Ce que j’ai fait',
     live: {
