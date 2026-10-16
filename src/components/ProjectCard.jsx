@@ -34,11 +34,14 @@ export default function ProjectCard({ project, number, onOpen, onFocus, eager = 
     tiltRef.current.style.setProperty('--ry', `${(x * 6).toFixed(2)}deg`)
     tiltRef.current.style.setProperty('--mx', `${(-x * 14).toFixed(1)}px`)
     tiltRef.current.style.setProperty('--my', `${(-y * 10).toFixed(1)}px`)
+    // Where the light catches the surface
+    tiltRef.current.style.setProperty('--lx', `${((x + 0.5) * 100).toFixed(1)}%`)
+    tiltRef.current.style.setProperty('--ly', `${((y + 0.5) * 100).toFixed(1)}%`)
     pillRef.current.style.translate = `${e.clientX - rect.left}px ${e.clientY - rect.top}px`
   }
 
   const onPointerLeave = () => {
-    for (const prop of ['--rx', '--ry', '--mx', '--my']) tiltRef.current.style.removeProperty(prop)
+    for (const prop of ['--rx', '--ry', '--mx', '--my', '--lx', '--ly']) tiltRef.current.style.removeProperty(prop)
   }
 
   return (
@@ -55,10 +58,20 @@ export default function ProjectCard({ project, number, onOpen, onFocus, eager = 
         ref={tiltRef}
         className="relative transition-transform duration-500 ease-out [transform:rotateX(var(--rx,0deg))_rotateY(var(--ry,0deg))] group-hover:[transform:rotateX(var(--rx,0deg))_rotateY(var(--ry,0deg))_translateZ(14px)]"
       >
-        <div className="relative aspect-[4/5] overflow-hidden rounded-[6px] md:aspect-[16/10] border border-line bg-surface shadow-[0_1px_2px_rgb(0_0_0/0.04),0_24px_48px_-28px_rgb(60_40_20/0.28)]">
+        <div
+          data-visual
+          className="relative aspect-[4/5] overflow-hidden rounded-[6px] md:aspect-[16/10] border border-line bg-surface shadow-[0_1px_2px_rgb(0_0_0/0.04),0_24px_48px_-28px_rgb(60_40_20/0.28)] transition-shadow duration-500 group-hover:shadow-[0_1px_2px_rgb(0_0_0/0.04),0_40px_70px_-30px_rgb(60_40_20/0.4)]"
+        >
           <div className="absolute -inset-4 transition-transform duration-700 ease-out [transform:translate(var(--mx,0px),var(--my,0px))]">
             <ProjectVisual project={project} number={number} eager={eager} />
           </div>
+          {/* Distance: cards further back sit in the page's own colour, like haze */}
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-ink [opacity:var(--shade,0)]" />
+          {/* A soft sheen that follows the pointer */}
+          <div
+            aria-hidden="true"
+            className="card-sheen pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+          />
         </div>
 
         {/* Follows the cursor on desktop (physical left/top: it's placed from clientX/Y) */}

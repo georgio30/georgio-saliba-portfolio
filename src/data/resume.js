@@ -8,6 +8,8 @@ export const profile = {
   email: 'georgiosaliba@hotmail.com',
   linkedin: 'https://lb.linkedin.com/in/georgio-saliba-30265a2b4',
   github: 'https://github.com/georgio30',
+  // A résumé PDF in public/, e.g. '/Georgio-Saliba-CV.pdf'. Until there is one, links point to the Experience section
+  resume: null,
   // Shown in About as "Currently learning" when filled in, e.g. ['Next.js', 'Docker']
   learning: [],
   summary:

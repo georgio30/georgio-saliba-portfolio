@@ -4,7 +4,7 @@ import { ProjectCover, ProjectLayers } from './ProjectCover'
 import { gallerySlides } from '../lib/gallery'
 import { useI18n } from '../i18n'
 
-export default function ProjectGallery({ project, number, index, onChange }) {
+export default function ProjectGallery({ project, number, index, onChange, morphName }) {
   const { t, pick, dir } = useI18n()
   const slides = gallerySlides(project)
   const many = slides.length > 1
@@ -48,6 +48,7 @@ export default function ProjectGallery({ project, number, index, onChange }) {
         onPointerCancel={onPointerEnd}
         aria-roledescription="carousel"
         aria-label={t.gallery.images(pick(project.title))}
+        style={morphName ? { viewTransitionName: morphName } : undefined}
       >
         <div
           className={`flex h-full ${drag ? '' : 'transition-transform duration-500 ease-[cubic-bezier(0.22,0.61,0.36,1)]'}`}

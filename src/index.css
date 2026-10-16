@@ -82,6 +82,39 @@ body {
   transform: none;
 }
 
+/* Headlines: each word rises out of its own mask. .rise plays on load; .rise-on waits for its Reveal */
+.rise .w,
+.rise-on .w {
+  display: inline-block;
+  overflow: clip;
+  vertical-align: top;
+  /* Room for descenders and Arabic marks inside the mask */
+  padding-block: 0.08em 0.14em;
+  margin-block: -0.08em -0.14em;
+}
+
+.rise .w > span,
+.rise-on .w > span {
+  display: inline-block;
+  transform: translateY(108%);
+}
+
+.rise .w > span,
+.is-visible.rise-on .w > span,
+.is-visible .rise-on .w > span {
+  animation: rise 1s cubic-bezier(0.2, 0.75, 0.15, 1) both;
+  animation-delay: calc(var(--i, 0) * 65ms + var(--rise-delay, 0ms));
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(108%) rotate(2.5deg);
+  }
+  to {
+    transform: none;
+  }
+}
+
 /* Snake: menus fade in over the board, and the score gives a little bump when it changes */
 @keyframes snake-in {
   from {
@@ -115,6 +148,14 @@ body {
     opacity: 1;
     transform: none;
     transition: none;
+  }
+
+  .rise .w > span,
+  .rise-on .w > span,
+  .row-in,
+  .world-card {
+    animation: none !important;
+    transform: none;
   }
 
   *,
@@ -232,4 +273,106 @@ body {
   background: var(--color-accent);
   opacity: 0.35;
   animation: mine-hold 350ms linear both;
+}
+
+/* Selected work: the light on a card, and the image-to-case-study morph */
+/* No blend mode here: blending inside the 3D scene can stop Chrome from painting it */
+.card-sheen {
+  background: radial-gradient(circle at var(--lx, 50%) var(--ly, 30%), rgb(255 255 255 / 0.28), transparent 55%);
+}
+
+:root.dark .card-sheen {
+  background: radial-gradient(circle at var(--lx, 50%) var(--ly, 30%), rgb(255 255 255 / 0.12), transparent 55%);
+}
+
+/* On phones the filter chips can scroll sideways; fade the far edge so that reads as "more" */
+@media (max-width: 639px) {
+  .chip-row {
+    mask-image: linear-gradient(to right, #000 calc(100% - 1.5rem), transparent);
+  }
+
+  [dir="rtl"] .chip-row {
+    mask-image: linear-gradient(to left, #000 calc(100% - 1.5rem), transparent);
+  }
+}
+
+/* The island: a landmark's card opening up when the ball arrives, and the "what next" links appearing */
+@keyframes world-card {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+.world-card {
+  animation: world-card 0.45s var(--ease-out-soft) both;
+}
+
+/* The project list: rows settle in one after another, and hovering one quiets the rest */
+@keyframes row-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
+.row-in {
+  animation: row-in 0.7s var(--ease-out-soft) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+
+@media (hover: hover) {
+  .work-list:has(.work-row:hover) .work-row:not(:hover) {
+    opacity: 0.35;
+  }
+}
+
+::view-transition-group(project-visual) {
+  animation-duration: 0.62s;
+  animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+::view-transition-old(project-visual),
+::view-transition-new(project-visual) {
+  /* The card and the gallery have different shapes; fill the frame instead of squashing */
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.4s;
+}
+
+/* Case study: the request dot travelling between layers, and a stat settling in */
+@keyframes layer-ping {
+  from {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-accent) 35%, transparent);
+  }
+  to {
+    box-shadow: 0 0 0 10px transparent;
+  }
+}
+
+.layer-ping {
+  animation: layer-ping 0.7s ease-out;
+}
+
+@keyframes layer-down {
+  from {
+    top: 0;
+  }
+  to {
+    top: calc(100% - 0.5rem);
+  }
+}
+
+@keyframes layer-up {
+  from {
+    bottom: 0;
+  }
+  to {
+    bottom: calc(100% - 0.5rem);
+  }
 }

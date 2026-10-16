@@ -1,183 +1,321 @@
-import { useEffect, useRef, useState } from 'react'
-import ProjectCard from './ProjectCard'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
+import ProjectCard, { ProjectVisual } from './ProjectCard'
 import ProjectModal from './ProjectModal'
-import { projects } from '../data/projects'
+import Reveal from './Reveal'
+import Words from './Words'
+import { categories, projects } from '../data/projects'
 import { useMediaQuery, useReducedMotion } from '../lib/hooks'
+import { clamp, ease, pad } from '../lib/motion'
 import { useI18n } from '../i18n'
 
-const pad = (n) => String(n).padStart(2, '0')
-const clamp = (v, min, max) => Math.min(max, Math.max(min, v))
+// The preview's image and the case study's gallery share this name, so the browser morphs one into the other
+const MORPH = 'project-visual'
 
-// Scroll length per project and the pause before the first / after the last, in screen heights
-const STEP = 0.9
-const DWELL = 0.35
-const LAST = projects.length - 1
-const TOTAL = LAST * STEP + 2 * DWELL
-
-// Where a card sits in the scene, from its distance to the front of the stage.
-// d > 0: still ahead, waiting further back and a little higher.
-// d < 0: already passed, drifting back and off to one side.
-function place(d, side, compact) {
-  const k = compact ? 0.5 : 1
-  if (d >= 0) {
-    const z = -d * 620 * k
-    return {
-      z,
-      transform: `translate3d(0, ${-d * 130 * k}px, ${z}px) rotateX(${compact ? 0 : d * 3}deg)`,
-      opacity: d < 1.2 ? 1 : clamp(1 - (d - 1.2) * 0.8, 0, 1),
-    }
-  }
-  const a = -d
-  // Sinks back fast, so it drops behind the card that is taking its place
-  const z = -a * 1100 * k
-  return {
-    z,
-    transform: `translate3d(${side * a * (compact ? 30 : 40)}vw, ${a * 30}px, ${z}px) rotateY(${-side * a * (compact ? 6 : 16)}deg)`,
-    opacity: clamp(1 - (a - 0.4) * 1.8, 0, 1),
-  }
+// 'all', 'category:<id>' or 'tech:<name>'
+function matches(project, filter) {
+  const [kind, value] = filter.split(/:(.*)/)
+  if (kind === 'category') return project.category === value
+  if (kind === 'tech') return project.technologies.includes(value)
+  return true
 }
 
-function sectionScroll(section) {
-  const range = section.offsetHeight - window.innerHeight
-  const top = section.getBoundingClientRect().top + window.scrollY
-  return { range, top }
+const number = (project) => pad(projects.indexOf(project) + 1)
+
+function Filters({ filter, onChange, count }) {
+  const { t, pick } = useI18n()
+  const tech = filter.startsWith('tech:') ? filter.slice(5) : null
+  const chip = (active) =>
+    `inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors duration-200 sm:px-3 sm:text-sm ${
+      active ? 'border-fg bg-fg text-ink' : 'border-line text-muted hover:border-fg/30 hover:text-fg'
+    }`
+  const options = [
+    { id: 'all', label: t.work.all, n: projects.length },
+    ...categories.map((c) => ({
+      id: `category:${c.id}`,
+      label: pick(c.label),
+      n: projects.filter((p) => p.category === c.id).length,
+    })),
+  ]
+
+  return (
+    <>
+      <div
+        role="group"
+        aria-label={t.work.filters}
+        className="chip-row -mx-1 flex max-w-full gap-1.5 overflow-x-auto px-1 py-1 [scrollbar-width:none]"
+      >
+        {options.map((o) => (
+          <button key={o.id} type="button" aria-pressed={filter === o.id} onClick={() => onChange(o.id)} className={chip(filter === o.id)}>
+            {o.label}
+            <span aria-hidden="true" className="hidden tabular-nums opacity-60 min-[400px]:inline">
+              {o.n}
+            </span>
+          </button>
+        ))}
+        {tech && (
+          <button type="button" onClick={() => onChange('all')} aria-label={t.work.clearFilter(tech)} className={chip(true)}>
+            {t.work.builtWith(tech)}
+            <span aria-hidden="true">×</span>
+          </button>
+        )}
+      </div>
+      <p className="sr-only" aria-live="polite">
+        {t.work.showing(count)}
+      </p>
+    </>
+  )
+}
+
+// One line of the list: number, title, what it is, the stack and the year
+function ProjectRow({ project, onOpen, onEnter }) {
+  const { t, pick } = useI18n()
+  const title = pick(project.title)
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      onPointerEnter={(e) => e.pointerType === 'mouse' && onEnter(e)}
+      onFocus={(e) => e.currentTarget.matches(':focus-visible') && onEnter(e)}
+      aria-label={t.work.openProject(number(project), title)}
+      className="work-row group grid w-full grid-cols-[2.5rem_1fr_auto] items-baseline gap-x-6 border-t border-line py-7 text-start transition-opacity duration-500 lg:grid-cols-[3rem_1fr_15rem_4rem_2rem] lg:py-9"
+    >
+      <span className="text-sm tabular-nums text-muted" dir="ltr">
+        {number(project)}
+      </span>
+      <span className="min-w-0">
+        <span className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
+          <span className="font-display text-4xl leading-[1.05] text-fg transition-[translate,color] duration-500 ease-out group-hover:translate-x-2 group-hover:text-accent group-focus-visible:text-accent lg:text-6xl rtl:group-hover:-translate-x-2">
+            {title}
+          </span>
+          {project.note && <span className="rounded-full border border-line px-2.5 py-0.5 text-xs text-muted">{pick(project.note)}</span>}
+        </span>
+        <span className="mt-3 block max-w-xl text-sm leading-relaxed text-muted">{pick(project.summary)}</span>
+      </span>
+      <span className="hidden text-sm leading-relaxed text-muted lg:block">{project.technologies.slice(0, 4).join(' · ')}</span>
+      <span className="hidden text-sm tabular-nums text-muted lg:block" dir="ltr">
+        {project.year}
+      </span>
+      <span
+        aria-hidden="true"
+        className="self-center text-xl text-muted transition-[translate,color] duration-300 ease-out group-hover:translate-x-1 group-hover:text-accent rtl:-scale-x-100 rtl:group-hover:-translate-x-1"
+      >
+        →
+      </span>
+    </button>
+  )
 }
 
 export default function ProjectShowcase() {
   const { t } = useI18n()
   const reduced = useReducedMotion()
-  const compact = !useMediaQuery('(min-width: 768px)')
+  // The list with a floating preview needs a mouse and some width; phones and tablets get cards
+  const list = useMediaQuery('(min-width: 768px) and (hover: hover) and (pointer: fine)')
+  const [filter, setFilter] = useState('all')
   const [open, setOpen] = useState(null)
+  const [hovered, setHovered] = useState(null)
+  // Where the open case study came from: 'island' or 'list'
+  const [origin, setOrigin] = useState('list')
+  const islandCard = useRef(null)
 
-  const sectionRef = useRef(null)
-  const cardRefs = useRef([])
-  const counterRef = useRef(null)
-  const barRef = useRef(null)
-  const hintRef = useRef(null)
+  const visible = useMemo(() => projects.filter((p) => matches(p, filter)), [filter])
 
-  useEffect(() => {
-    if (reduced) return
-    let frame = 0
+  const listRef = useRef(null)
+  const previewRef = useRef(null)
+  const cardRefs = useRef({})
+  // Where the preview has eased to, and where it's heading
+  const motion = useRef({ x: 0, y: 0, tx: 0, ty: 0, tilt: 0, frame: 0, then: 0, placed: false })
 
-    const update = () => {
-      frame = 0
-      const section = sectionRef.current
-      const { range } = sectionScroll(section)
-      const u = clamp(-section.getBoundingClientRect().top / range, 0, 1) * TOTAL
-      const p = clamp((u - DWELL) / STEP, 0, LAST)
-
-      cardRefs.current.forEach((el, i) => {
-        const d = i - p
-        const { z, transform, opacity } = place(d, i % 2 ? 1 : -1, compact)
-        el.style.transform = transform
-        el.style.opacity = opacity
-        // Nearer cards on top, even where the browser doesn't depth-sort 3D layers
-        el.style.zIndex = String(Math.round(2000 + z))
-        // Only the card at the front shows its title underneath
-        el.style.setProperty('--meta', clamp(1 - Math.abs(d) * 3, 0, 1))
-        el.style.pointerEvents = Math.abs(d) < 0.3 ? 'auto' : 'none'
-      })
-      counterRef.current.textContent = pad(Math.round(p) + 1)
-      barRef.current.style.transform = `scaleX(${LAST ? p / LAST : 1})`
-      hintRef.current.style.opacity = p < 0.15 ? 1 : 0
+  // The preview trails the pointer, leaning a little into the direction it moves
+  const follow = (x, y) => {
+    const m = motion.current
+    const rect = listRef.current.getBoundingClientRect()
+    m.tx = x - rect.left
+    m.ty = y - rect.top
+    if (!m.placed || reduced) {
+      m.x = m.tx
+      m.y = m.ty
+      m.placed = true
     }
-
-    const schedule = () => {
-      if (!frame) frame = requestAnimationFrame(update)
+    const step = (now) => {
+      m.frame = 0
+      const dt = m.then ? Math.min(now - m.then, 64) : 16
+      m.then = now
+      const k = reduced ? 1 : ease(dt, 90)
+      const dx = (m.tx - m.x) * k
+      m.x += dx
+      m.y += (m.ty - m.y) * k
+      m.tilt += (clamp(dx * 0.35, -7, 7) - m.tilt) * (reduced ? 1 : ease(dt, 120))
+      const el = previewRef.current
+      if (el) el.style.transform = `translate(${m.x.toFixed(1)}px, ${m.y.toFixed(1)}px) translate(-50%, -50%) rotate(${m.tilt.toFixed(2)}deg)`
+      const settled = Math.abs(m.tx - m.x) < 0.3 && Math.abs(m.ty - m.y) < 0.3 && Math.abs(m.tilt) < 0.05
+      if (settled) m.then = 0
+      else m.frame = requestAnimationFrame(step)
     }
-    update()
-    window.addEventListener('scroll', schedule, { passive: true })
-    window.addEventListener('resize', schedule)
-    return () => {
-      cancelAnimationFrame(frame)
-      window.removeEventListener('scroll', schedule)
-      window.removeEventListener('resize', schedule)
-    }
-  }, [reduced, compact])
-
-  // Tabbing to a card that's still in the distance brings it to the front
-  const bringForward = (i) => (e) => {
-    if (reduced || !e.currentTarget.matches(':focus-visible')) return
-    const { range, top } = sectionScroll(sectionRef.current)
-    window.scrollTo({ top: top + ((DWELL + i * STEP) / TOTAL) * range, behavior: 'smooth' })
+    if (!m.frame) m.frame = requestAnimationFrame(step)
   }
 
-  const modal = open !== null && (
-    <ProjectModal
-      projects={projects}
-      index={open}
-      onIndexChange={setOpen}
-      onClose={() => setOpen(null)}
-    />
-  )
+  useEffect(() => () => cancelAnimationFrame(motion.current.frame), [])
 
-  if (reduced) {
-    return (
-      <section id="work" aria-label={t.work.label} className="mx-auto max-w-4xl px-5 py-24 sm:px-8">
-        <p className="mb-12 text-sm text-muted">{t.work.label}</p>
-        <ol className="space-y-20">
-          {projects.map((project, i) => (
-            <li key={project.slug}>
-              <ProjectCard project={project} number={pad(i + 1)} onOpen={() => setOpen(i)} eager={i === 0} />
-            </li>
-          ))}
-        </ol>
-        {modal}
-      </section>
-    )
+  const onListMove = (e) => {
+    if (e.pointerType === 'mouse') follow(e.clientX, e.clientY)
+  }
+  const onListLeave = () => {
+    setHovered(null)
+    motion.current.placed = false
+  }
+  // Keyboard focus puts the preview beside the row instead of under a pointer
+  const onRowEnter = (slug) => (e) => {
+    setHovered(slug)
+    if (e.type === 'focus') {
+      const r = e.currentTarget.getBoundingClientRect()
+      motion.current.placed = false
+      follow(document.dir === 'rtl' ? r.left + r.width * 0.3 : r.left + r.width * 0.7, r.top + r.height / 2)
+    }
+  }
+
+  // The element the case study morphs from: the preview on desktop, the card's image on phones
+  const visualFor = (slug) => {
+    if (list) return hovered === slug ? (previewRef.current?.querySelector(`[data-slug="${slug}"]`) ?? null) : null
+    return cardRefs.current[slug]?.querySelector('[data-visual]') ?? null
+  }
+
+  const canMorph = () => !reduced && typeof document.startViewTransition === 'function'
+
+  // Opening: the image grows into the case study's gallery
+  const openProject = (slug) => {
+    setOrigin('list')
+    const visual = visualFor(slug)
+    if (!canMorph() || !visual) return setOpen(slug)
+    visual.style.viewTransitionName = MORPH
+    const transition = document.startViewTransition(() => {
+      visual.style.viewTransitionName = ''
+      flushSync(() => setOpen(slug))
+    })
+    // A skipped transition (a hidden tab, say) still makes the change, just without the morph
+    transition.ready.catch(() => {})
+  }
+
+  // Closing: shrinks back into its card on phones. On desktop the pointer has usually moved on,
+  // so the case study fades out by itself (returning false says so)
+  const morphClose = () => {
+    // Opened from the island: shrink back into the landmark's card, which is still there
+    const card = origin === 'island' && islandCard.current?.isConnected ? islandCard.current : null
+    const visual = card ?? (list ? null : visualFor(open))
+    if (!canMorph() || !visual) return false
+    const transition = document.startViewTransition(() => {
+      flushSync(() => setOpen(null))
+      visual.style.viewTransitionName = MORPH
+    })
+    transition.ready.catch(() => {})
+    transition.finished.finally(() => (visual.style.viewTransitionName = ''))
+    return true
+  }
+
+  // From the hero's island: the landmark's card grows into the case study, whatever the filter
+  useEffect(() => {
+    const onOpen = (e) => {
+      const { slug, from } = e.detail
+      islandCard.current = from
+      const show = () => {
+        if (!visible.some((p) => p.slug === slug)) setFilter('all')
+        setOrigin('island')
+        setOpen(slug)
+      }
+      if (!canMorph() || !from) return show()
+      from.style.viewTransitionName = MORPH
+      const transition = document.startViewTransition(() => {
+        from.style.viewTransitionName = ''
+        flushSync(show)
+      })
+      transition.ready.catch(() => {})
+    }
+    window.addEventListener('open-project', onOpen)
+    return () => window.removeEventListener('open-project', onOpen)
+  })
+
+  // Leaving a case study for another part of the page: close it at once, then go there
+  const leaveTo = (id) => {
+    flushSync(() => setOpen(null))
+    document.getElementById(id)?.scrollIntoView({ behavior: reduced ? 'instant' : 'smooth' })
+  }
+
+  // From a technology tag in a case study: close it and show every project that uses it
+  const filterByTech = (tech) => {
+    // Synchronously, so the case study has put the page's scroll back before the list is scrolled to
+    flushSync(() => setOpen(null))
+    setFilter(`tech:${tech}`)
+    document.getElementById('work')?.scrollIntoView({ behavior: reduced ? 'instant' : 'smooth' })
   }
 
   return (
-    <section
-      id="work"
-      ref={sectionRef}
-      aria-label={t.work.label}
-      className="relative"
-      style={{ height: `${100 + TOTAL * 100}vh` }}
-    >
-      <div className="sticky top-0 h-[100svh] overflow-clip">
-        <div className="absolute inset-x-0 top-20 z-[3000] mx-auto flex max-w-6xl items-baseline justify-between px-5 text-sm text-muted sm:px-8 md:top-24">
-          <span>{t.work.label}</span>
-          <span className="tabular-nums" aria-hidden="true" dir="ltr">
-            <span ref={counterRef} className="text-fg">
-              01
-            </span>{' '}
-            / {pad(projects.length)}
-          </span>
+    <section id="work" aria-labelledby="work-title" className="mx-auto max-w-6xl px-5 py-24 sm:px-8 md:py-32">
+      <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-8">
+        <div>
+          <p className="text-sm text-muted">{t.work.label}</p>
+          <Reveal as="h2" id="work-title" className="rise-on mt-6 max-w-2xl text-balance font-display text-4xl leading-[1.1] text-fg md:text-5xl">
+            <Words text={t.work.title} />
+          </Reveal>
         </div>
+        <Filters filter={filter} onChange={setFilter} count={visible.length} />
+      </div>
 
-        <ol
-          className={`pointer-events-none grid h-full place-items-center pt-10 md:pt-24 ${
-            compact ? '[perspective:900px]' : '[perspective:1400px]'
-          } [perspective-origin:50%_35%] [transform-style:preserve-3d]`}
-        >
-          {projects.map((project, i) => (
-            <li
-              key={project.slug}
-              ref={(el) => (cardRefs.current[i] = el)}
-              className="w-[min(88vw,calc((100svh-15rem)*0.8))] [grid-area:1/1] md:w-[min(880px,88vw,calc((100svh-15rem)*1.6))] [transform-style:preserve-3d] will-change-transform"
+      {list ? (
+        <div ref={listRef} onPointerMove={onListMove} onPointerLeave={onListLeave} className="relative mt-14 md:mt-20">
+          <ol key={filter} className="work-list border-b border-line">
+            {visible.map((project, i) => (
+              <li key={project.slug} className="row-in" style={{ '--i': i }}>
+                <ProjectRow project={project} onOpen={() => openProject(project.slug)} onEnter={onRowEnter(project.slug)} />
+              </li>
+            ))}
+          </ol>
+
+          {/* Follows the pointer (physical left/top: it's placed from clientX/Y) */}
+          <div
+            ref={previewRef}
+            aria-hidden="true"
+            className="pointer-events-none absolute top-0 left-0 z-10 w-[clamp(16rem,26vw,22rem)] will-change-transform"
+          >
+            <div
+              className={`relative aspect-[16/10] overflow-hidden rounded-[6px] border border-line bg-surface shadow-[0_30px_60px_-28px_rgb(40_25_10/0.45)] transition-[opacity,scale] duration-500 ease-out ${
+                hovered ? 'scale-100 opacity-100' : 'scale-90 opacity-0'
+              }`}
             >
-              <ProjectCard
-                project={project}
-                number={pad(i + 1)}
-                onOpen={() => setOpen(i)}
-                onFocus={bringForward(i)}
-                eager={i < 2}
-              />
+              {visible.map((project) => (
+                <div
+                  key={project.slug}
+                  data-slug={project.slug}
+                  className={`absolute inset-0 transition-opacity duration-300 ${hovered === project.slug ? 'opacity-100' : 'opacity-0'}`}
+                >
+                  <ProjectVisual project={project} number={number(project)} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <ol key={filter} className="mt-12 space-y-16">
+          {visible.map((project, i) => (
+            <li key={project.slug} ref={(el) => (cardRefs.current[project.slug] = el)} className="row-in" style={{ '--i': i }}>
+              <ProjectCard project={project} number={number(project)} onOpen={() => openProject(project.slug)} eager={i === 0} />
             </li>
           ))}
         </ol>
+      )}
 
-        <div className="absolute inset-x-0 bottom-8 z-[3000] mx-auto flex max-w-6xl items-center gap-6 px-5 sm:px-8">
-          <div className="relative h-px flex-1 bg-line">
-            <div ref={barRef} className="absolute inset-0 origin-left scale-x-0 bg-accent rtl:origin-right" />
-          </div>
-          <span ref={hintRef} aria-hidden="true" className="text-xs text-muted transition-opacity duration-500">
-            {t.work.keepScrolling}
-          </span>
-        </div>
-      </div>
-      {modal}
+      {open !== null && (
+        <ProjectModal
+          projects={visible}
+          slug={open}
+          onSelect={setOpen}
+          onClose={() => setOpen(null)}
+          morphClose={morphClose}
+          morph={canMorph()}
+          onFilterTech={filterByTech}
+          origin={origin}
+          onLeave={leaveTo}
+        />
+      )}
     </section>
   )
 }
