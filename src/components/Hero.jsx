@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import Reveal from './Reveal'
 import Words from './Words'
 import HeroWorld from './HeroWorld'
+import HeroQuickStart from './HeroQuickStart'
 import { hasWebGL } from '../lib/island'
 import { profile } from '../data/resume'
 import { useMediaQuery, useReducedMotion } from '../lib/hooks'
@@ -56,7 +57,7 @@ export default function Hero() {
 
   return (
     // overflow-x-clip: a translated headline can push the handwritten note past the edge; clip it, don't scroll
-    <section id="home" className="relative flex min-h-[100svh] flex-col overflow-x-clip lg:flex-row lg:items-center">
+    <section id="home" className="relative flex min-h-[100svh] flex-col justify-center overflow-x-clip lg:flex-row lg:items-center">
       <div
         ref={innerRef}
         className={`relative z-10 mx-auto w-full max-w-6xl origin-top px-5 pt-28 sm:px-8 ${world ? 'pb-6 lg:pointer-events-none lg:pb-20' : 'pb-20'}`}
@@ -137,6 +138,9 @@ export default function Hero() {
               </span>
             </a>
           </div>
+
+          {/* Without the archipelago, a quick way into the projects instead */}
+          {!world && <HeroQuickStart />}
         </Reveal>
       </div>
 

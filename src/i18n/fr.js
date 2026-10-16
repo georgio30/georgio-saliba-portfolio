@@ -29,6 +29,8 @@ export default {
     intro:
       'Des interfaces React et TypeScript posées sur des API Node.js et MySQL. Faites défiler pour en découvrir quelques-unes.',
     explore: 'Voir les projets',
+    open: 'Ouvert aux postes full-stack',
+    start: 'Commencez par un projet',
     introWorld:
       'Des interfaces React et TypeScript posées sur des API Node.js et MySQL. Volez d’île en île pour en visiter quelques-unes, ou faites défiler pour la liste complète.',
   },

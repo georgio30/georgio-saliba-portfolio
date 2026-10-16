@@ -24,6 +24,8 @@ export default {
     note: ['schema → API → UI,', 'all of it.'],
     intro: 'React and TypeScript interfaces on top of Node.js APIs and MySQL. Scroll down to walk through a few of them.',
     explore: 'Explore work',
+    open: 'Open to full-stack roles',
+    start: 'Start with a project',
     introWorld: 'React and TypeScript interfaces on top of Node.js APIs and MySQL. Fly between the islands to visit a few of them, or scroll down for the full list.',
   },
   world: {

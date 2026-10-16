@@ -10,5 +10,5 @@ export function hasWebGL() {
   }
 }
 
-// ProjectShowcase listens for this and opens the case study
-export const openProject = (slug) => window.dispatchEvent(new CustomEvent('open-project', { detail: { slug } }))
+// ProjectShowcase listens for this and opens the case study. `from`: 'island' (the archipelago) or 'hero' (the cards shown instead of it)
+export const openProject = (slug, from = 'island') => window.dispatchEvent(new CustomEvent('open-project', { detail: { slug, from } }))

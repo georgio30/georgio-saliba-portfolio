@@ -114,7 +114,7 @@ export default function ProjectShowcase() {
   const [filter, setFilter] = useState('all')
   const [open, setOpen] = useState(null)
   const [hovered, setHovered] = useState(null)
-  // Where the open case study came from: 'island' or 'list'
+  // Where the open case study came from: 'island', 'hero' (the cards shown instead of the island) or 'list'
   const [origin, setOrigin] = useState('list')
 
   const visible = useMemo(() => projects.filter((p) => matches(p, filter)), [filter])
@@ -198,8 +198,8 @@ export default function ProjectShowcase() {
   // Closing: shrinks back into its card on phones. On desktop the pointer has usually moved on,
   // so the case study fades out by itself (returning false says so)
   const morphClose = () => {
-    // Opened from the island, it fades out by itself
-    const visual = origin === 'island' || list ? null : visualFor(open)
+    // Opened from the hero (island or cards), it fades out by itself: its card in the list may be far off screen
+    const visual = origin !== 'list' || list ? null : visualFor(open)
     if (!canMorph() || !visual) return false
     const transition = document.startViewTransition(() => {
       flushSync(() => setOpen(null))
@@ -214,9 +214,9 @@ export default function ProjectShowcase() {
   // No morph here: growing a small rounded label into the gallery looks round before it turns square.
   useEffect(() => {
     const onOpen = (e) => {
-      const { slug } = e.detail
+      const { slug, from } = e.detail
       if (!visible.some((p) => p.slug === slug)) setFilter('all')
-      setOrigin('island')
+      setOrigin(from)
       setOpen(slug)
     }
     window.addEventListener('open-project', onOpen)

@@ -340,7 +340,7 @@ export default function ProjectModal({ projects, slug, onSelect, onClose, morphC
               )}
               {onLeave && (
                 <>
-                  {origin === 'island' && (
+                  {origin !== 'list' && (
                     <button type="button" onClick={() => onLeave('work')} className={afterButton}>
                       {t.project.after.compare}
                     </button>
